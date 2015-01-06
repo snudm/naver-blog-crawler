@@ -48,7 +48,7 @@ for j in range(1,6):
 		f.close()
 		
 		i = i+1
-		break
+		
 
 	# if i==5:
 	# 	break
