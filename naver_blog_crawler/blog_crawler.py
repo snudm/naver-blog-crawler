@@ -6,6 +6,8 @@ import urllib2
 import json
 
 
+URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?option.page.currentPage=%s&option.templateKind=0&option.directorySeq=29&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
+
 def crawl_page(url):
 	page = urllib2.urlopen(url)
 	doc = BeautifulSoup(page.read())
@@ -39,18 +41,13 @@ def write_obj_to_file(obj, i, p):
 	f.write(jsonstr)
 	f.close()
 
-def each_page_crawler(images, p):
-	i = 1
-	for image in images:
-		obj = make_structure(image)
-		write_obj_to_file(obj, i, p)
-		i = i + 1
-
 def total_page_crawler(page_need):
 	for p in range(1, page_need+1):
-		url = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?option.page.currentPage='+ str(p)+ '&option.templateKind=0&option.directorySeq=29&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
-		images = crawl_page(url)
-		each_page_crawler(images, p)
+		images = crawl_page(URLBASE % p)
+		for i, image in enumerate(images):
+			obj = make_structure(image)
+			write_obj_to_file(obj, i+1, p)
+
 
 if __name__ == '__main__':
 	page_need = input('How many blog pages you need?: ')
