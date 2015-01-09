@@ -7,6 +7,9 @@
 
 ## Run
 
+### input
+- Insert the kinds of blog, ex) food, tour, technology, etc..
+
 ### Data crawliing
 
 - 
