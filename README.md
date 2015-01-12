@@ -7,15 +7,7 @@
 
 ## Run
 
-    $ python crawler.py
-    What kind of blog is it?    # Insert the kinds of blog
-
-### List of available blog types (kinds)
-
-- food
-- tour
-- technology
-- ...
+    $ python crawler.py --help
 
 ## Author 
 
