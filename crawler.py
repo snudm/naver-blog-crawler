@@ -1,10 +1,11 @@
 #-*-coding:utf-8-*-
 
 
-from bs4 import BeautifulSoup
-import urllib2
 import json
 import os
+import urllib2
+
+from bs4 import BeautifulSoup
 
 
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?option.page.currentPage=%s&option.templateKind=0&option.directorySeq=29&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
