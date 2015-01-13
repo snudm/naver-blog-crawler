@@ -25,6 +25,13 @@ def get_page(url):
     return doc.find_all("li", {"class":"add_img"})
 
 def make_structure(div):
+
+    def extract_url(div):
+        return div.find("a")['href']
+
+    def extract_writer(div):
+        return div.find("div", {"class": "list_data"}).find("a").get_text().encode('utf-8')
+    
     def extract_image(div):
         return div.find("div", {"class": "multi_img"}).img['src'].encode('utf-8')
 
@@ -36,8 +43,12 @@ def make_structure(div):
 
     def extract_text(div):
         return div.find("div", {"class":"list_content"}).get_text().encode('utf-8').strip()
+    #TODO: tag extract error
+    # def extract_tag(div):
 
-    return {u"date": extract_date(div),
+    return {u"url": extract_url(div),
+            u"writer": extract_writer(div),
+            u"date": extract_date(div),
             u"title": extract_title(div),
             u"text": extract_text(div),
             u"img": extract_image(div)}
@@ -52,11 +63,11 @@ def write_obj_to_file(obj, i, p, target, basedir='./data'):
 
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
-
+    #TODO: fix json file
     f = open('%s/%s-%s-%s.json' % (targetpath, year, month, day), 'a')
     jsonstr = json.dumps(obj, sort_keys=True, indent=4, encoding='utf-8')
     jsonstr = jsonstr + '\n'
-    f.write(jsonstr)
+    f.write(obj)
     f.close()
 
 def crawl(target):
@@ -77,10 +88,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', '--target', required=True, dest='target',
-                        help='assign target category to crawl%s' % targets)
+                         help='assign target category to crawl%s' % targets)
     args = parser.parse_args()
-
     if args.target not in TARGETS:
         raise ValueError('Target values must be in%s' % targets)
 
-    crawl(args.target)
+    crawl("book")
