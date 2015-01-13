@@ -8,7 +8,13 @@ import urllib2
 from bs4 import BeautifulSoup
 
 
-TARGETS = ['food', 'tour', 'technology']
+TARGETS = ['book', 'movie', 'design', 'performance', \
+           'music', 'drama', 'entertainer', 'cartoon', 'broadcasting', 'dailylife', \
+           'infantmarriage', 'pet', 'goodwriting', 'fashion', 'interior', 'cooking', \
+           'reviews', 'game', 'sport', 'picture', 'car', 'hobby', 'domestictravel', \
+           'overseastrip', 'restaurant', 'IT', 'society', 'health', 'business', \
+           'language', 'education']
+
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
           'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=29'\
           '&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
