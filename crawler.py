@@ -40,7 +40,7 @@ def make_structure(div):
         return div.find("a").get_text().encode('utf-8')
 
     def extract_date(div):
-        return div.find("span", {"class": "date"}).get_text().encode('utf-8')
+        return div.find("span", {"class": "date"}).get_text().encode('utf-8').replace(".", "-")
 
     def extract_text(div):
         return div.find("div", {"class":"list_content"}).get_text().encode('utf-8').strip()
@@ -50,9 +50,7 @@ def make_structure(div):
 
     def extract_logNo(div):
         return div.find("input", {"class": "vLogNo"})['value']
-    #TODO: tag extract error
-    # def extract_tag(div):
-
+   
     return {u"url": extract_url(div),
             u"writer": extract_writer(div),
             u"date": extract_date(div),
@@ -63,11 +61,8 @@ def make_structure(div):
             u"logNo": extract_logNo(div)}
 
 def make_json(objs, target, basedir='./data'):
-    
-   
+       
     date = objs[0][0]["date"]
-    print date
-    
     year = date[0:4]
     month = date[5:7]
     day = date[8:10]
@@ -97,7 +92,27 @@ def parse_page(divs, old_urls):
         else:
             objs.append(obj)
     return (objs, flag)
+
+def extract_tag(divs):
+        
+    blog_ids, log_nos = [], []
     
+    for obj in divs:
+        blog_ids.append(obj['id'])
+        log_nos.append(obj['logNo'])
+   
+    join_str = ','.join("{\"blogId\":\"%s\",\"logNo\":\"%s\"}" \
+                    % (b, l) for b, l in zip(blog_ids, log_nos))
+       
+    tags_url = 'http://section.blog.naver.com/TagSearchAsync.nhn?variables=[%s]' % join_str
+    response = urllib2.urlopen(tags_url)
+    html = json.loads(response.read())
+
+    for i, obj in enumerate(html):
+        divs[i]["tags"] = html[i]['tags'] 
+
+    return divs
+        
 def get_old_url(target, basedir='./data'):
 
     now_year = datetime.today().year
@@ -110,7 +125,6 @@ def get_old_url(target, basedir='./data'):
         now_hour = 24
 
     targetpath = '%s/%s/%s/%02d/%02d' % (basedir, target, now_year, now_month, now_day)
-
     filename = '%s/%s-%02d-%02d-%02d.json' \
                     % (targetpath,now_year, now_month, now_day, now_hour-1)
     
@@ -138,7 +152,8 @@ def crawl(target):
         
         divs = get_page(URLBASE % pagenum)
         objs, flag = parse_page(divs, old_urls)
-        new_items.append(objs)
+        objs_tags = extract_tag(objs)
+        new_items.append(objs_tags)
         pagenum += 1
         max_page -= 1
 
@@ -156,5 +171,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.target not in TARGETS:
         raise ValueError('Target values must be in%s' % targets)
-
+   
     crawl(arg.target)
