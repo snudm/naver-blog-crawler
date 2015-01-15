@@ -16,7 +16,7 @@ TARGETS = ['book', 'movie', 'design', 'performance', \
            'language', 'education']
 
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
-          'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=29'\
+          'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=%s'\
           '&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
 
 def get_page(url):
@@ -53,16 +53,16 @@ def make_structure(div):
    
     return {u"url": extract_url(div),
             u"writer": extract_writer(div),
-            u"date": extract_date(div),
+            u"datetime": extract_date(div),
             u"title": extract_title(div),
-            u"text": extract_text(div),
-            u"img": extract_image(div),
-            u"id": extract_blogId(div),
-            u"logNo": extract_logNo(div)}
+            u"content": extract_text(div),
+            u"images": [{u"url":extract_image(div)}],
+            u"provider": extract_blogId(div),
+            u"aid": extract_logNo(div)}
 
 def make_json(objs, target, basedir='./data'):
        
-    date = objs[0][0]["date"]
+    date = objs[0][0]["datetime"]
     year = date[0:4]
     month = date[5:7]
     day = date[8:10]
@@ -74,7 +74,7 @@ def make_json(objs, target, basedir='./data'):
         os.makedirs(targetpath)
 
     filename = '%s/%s-%s-%s-%s.json' % (targetpath, year, month, day, now_time)
-    f = open(filename, 'a')
+    f = open(filename, 'w')
     jsonstr = json.dumps(objs, sort_keys=True, indent=4, encoding='utf-8')
     f.write(jsonstr)
     f.close()
@@ -98,8 +98,8 @@ def extract_tag(divs):
     blog_ids, log_nos = [], []
     
     for obj in divs:
-        blog_ids.append(obj['id'])
-        log_nos.append(obj['logNo'])
+        blog_ids.append(obj['provider'])
+        log_nos.append(obj['aid'])
    
     join_str = ','.join("{\"blogId\":\"%s\",\"logNo\":\"%s\"}" \
                     % (b, l) for b, l in zip(blog_ids, log_nos))
@@ -138,10 +138,11 @@ def get_old_url(target, basedir='./data'):
     
     return old_urls
 
-def crawl(target):
+def crawl(sectionID):
     # TODO: auto assign `page_need`
     new_items = []
     new_urls = []
+    target = extract_sectionID(sectionID)
     old_urls = get_old_url(target)
     pagenum = 1
     flag = True
@@ -150,7 +151,7 @@ def crawl(target):
         max_page = 5
     while(flag == True and max_page > 1):
         
-        divs = get_page(URLBASE % pagenum)
+        divs = get_page(URLBASE % (pagenum, sectionID))
         objs, flag = parse_page(divs, old_urls)
         objs_tags = extract_tag(objs)
         new_items.append(objs_tags)
@@ -158,6 +159,23 @@ def crawl(target):
         max_page -= 1
 
     make_json(new_items, target)
+
+def read_section_information():
+    f = open("section_information.txt", "r")
+    lines = f.readlines()
+    tg = []
+    secID = []
+    for line in lines:
+        tg.append(line.split(",")[0].replace("'", ""))
+        secID.append(int(line.split(",")[1]))
+    return zip(tg, secID)
+
+def extract_sectionID(sectionID):
+    secList = read_section_information()
+    for i in range(0, len(secList)):
+        if secList[i][1] == sectionID:
+            idx = i 
+    return secList[idx][0]
 
 if __name__ == '__main__':
     import argparse
@@ -173,3 +191,4 @@ if __name__ == '__main__':
         raise ValueError('Target values must be in%s' % targets)
    
     crawl(arg.target)
+
