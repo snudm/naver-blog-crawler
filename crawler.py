@@ -16,14 +16,15 @@ TARGETS = ['book', 'movie', 'design', 'performance', \
            'language', 'education']
 
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
-          'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=%s'\
-          '&option.viewType=default&option.orderBy=quality&option.latestOnly=1'
+          'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=%s&'\
+          'option.viewType=default&option.orderBy=date&option.latestOnly=1'
 
 def get_page(url):
     
     page = urllib2.urlopen(url)
     doc = BeautifulSoup(page.read())
-    return doc.find_all("li", {"class":"add_img"})
+    tmp_doc = doc.find("ul", {"class": "list_type_1"})
+    return tmp_doc.find_all("li")
 
 def make_structure(div):
 
@@ -34,7 +35,10 @@ def make_structure(div):
         return div.find("div", {"class": "list_data"}).find("a").get_text().encode('utf-8')
     
     def extract_image(div):
-        return div.find("div", {"class": "multi_img"}).img['src'].encode('utf-8')
+        if div.find("div", {"class": "multi_img"}) is None:
+            return []
+        else: 
+            return div.find("div", {"class": "multi_img"}).img['src'].encode('utf-8')
 
     def extract_title(div):
         return div.find("a").get_text().encode('utf-8')
@@ -62,18 +66,20 @@ def make_structure(div):
 
 def make_json(objs, target, basedir='./data'):
        
-    date = objs[0][0]["datetime"]
-    year = date[0:4]
-    month = date[5:7]
-    day = date[8:10]
+    year = datetime.today().year
+    month = datetime.today().month
+    day = datetime.today().day
+    hour = datetime.today().hour
+    minute = datetime.today().minute
+    sec = datetime.today().second
 
-    targetpath = '%s/%s/%s/%s/%s' % (basedir, target, year, month, day)
-    now_time = datetime.today().hour
-
+    targetpath = '%s/%s/%s/%02d/%02d' % (basedir, target, year, month, day)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
+    
+    filename = '%s/%s-%02d-%02d-%02d%02d%02d.json' \
+                    % (targetpath, year, month, day, hour, minute, sec)
 
-    filename = '%s/%s-%s-%s-%s.json' % (targetpath, year, month, day, now_time)
     f = open(filename, 'w')
     jsonstr = json.dumps(objs, sort_keys=True, indent=4, encoding='utf-8')
     f.write(jsonstr)
@@ -109,8 +115,7 @@ def extract_tag(divs):
     html = json.loads(response.read())
 
     for i, obj in enumerate(html):
-        divs[i]["tags"] = html[i]['tags'] 
-
+        obj["tags"] = obj['tags'] 
     return divs
         
 def get_old_url(target, basedir='./data'):
@@ -125,17 +130,17 @@ def get_old_url(target, basedir='./data'):
         now_hour = 24
 
     targetpath = '%s/%s/%s/%02d/%02d' % (basedir, target, now_year, now_month, now_day)
-    filename = '%s/%s-%02d-%02d-%02d.json' \
-                    % (targetpath,now_year, now_month, now_day, now_hour-1)
-    
-    if os.path.isfile(filename):
-
-        json_data = open(filename).read()
-        data = json.load(json_data)
-        old_urls = data['url']
+    if os.path.exists('./%s' % targetpath):
+        filename = max(os.listdir('./%s' % targetpath))
+        PATH = '%s/%s' % (targetpath, filename)
+        json_data = open(PATH).read()
+        data = json.loads(json_data)
+        old_urls =[]
+        for i, blog in enumerate(data):
+            old_urls.extend([data[i]['url']])
     else:
         old_urls = []
-    
+
     return old_urls
 
 def crawl(sectionID):
@@ -149,12 +154,12 @@ def crawl(sectionID):
     max_page = 100
     if old_urls == [] :
         max_page = 5
-    while(flag == True and max_page > 1):
+    while(flag == True and max_page >= 1):
         
         divs = get_page(URLBASE % (pagenum, sectionID))
         objs, flag = parse_page(divs, old_urls)
         objs_tags = extract_tag(objs)
-        new_items.append(objs_tags)
+        new_items.extend(objs_tags)
         pagenum += 1
         max_page -= 1
 
@@ -191,4 +196,3 @@ if __name__ == '__main__':
         raise ValueError('Target values must be in%s' % targets)
    
     crawl(arg.target)
-
