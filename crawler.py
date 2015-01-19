@@ -44,8 +44,9 @@ def make_structure(div, crawler_version, encoding='utf-8'):
         if not d:
             return []
         else:
-            return d.img['src'].encode(encoding)
-
+            dd = d.img['src'].encode(encoding)
+            return dd[:dd.find("?")]
+            
     return {u"blogId": extract_blog_id(div),
             u"blogName": extract_writer(div),
             u"content": extract_text(div),
