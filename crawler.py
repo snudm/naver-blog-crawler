@@ -27,9 +27,9 @@ def make_structure(div, crawler_version, encoding='utf-8'):
 
     sanitize = lambda s: s.get_text().encode(encoding).strip()
 
-    extract_blogId = lambda d: d.find("input", {"class": "vBlogId"})['value']
+    extract_blog_id = lambda d: d.find("input", {"class": "vBlogId"})['value']
     extract_date   = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
-    extract_logNo  = lambda d: d.find("input", {"class": "vLogNo"})['value']
+    extract_log_no  = lambda d: d.find("input", {"class": "vLogNo"})['value']
     extract_text   = lambda d: sanitize(d.find("div", {"class":"list_content"}))
     extract_title  = lambda d: sanitize(d.find("a"))
     extract_url    = lambda d: d.find("a")['href']
@@ -43,19 +43,19 @@ def make_structure(div, crawler_version, encoding='utf-8'):
         else:
             return d.img['src'].encode(encoding)
 
-    return {u"blogId": extract_blogId(div),
+    return {u"blogId": extract_blog_id(div),
             u"blogName": extract_writer(div),
             u"content": extract_text(div),
             u"crawledTime": extract_crawlerTime(),
             u"crawlerVersion": crawler_version,
             u"images": [{u"url":extract_image(div)}],
-            u"logNo": extract_logNo(div),
+            u"logNo": extract_log_no(div),
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
             u"url": extract_url(div)}
 
 
-def make_json(objs, category_id, version, basedir='./data'):
+def make_json(objs, directorySeq, version, basedir='./data'):
 
     year = datetime.today().year
     month = datetime.today().month
@@ -64,7 +64,7 @@ def make_json(objs, category_id, version, basedir='./data'):
     minute = datetime.today().minute
     sec = datetime.today().second
 
-    targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, category_id, year, month, day)
+    targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, directorySeq, year, month, day)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
 
@@ -109,7 +109,7 @@ def extract_tag(divs):
     return divs
 
 
-def get_old_url(category_id, basedir='./data', FlagDir=1):
+def get_old_url(directorySeq, basedir='./data', FlagDir=1):
 
     now_year = datetime.today().year
     now_month = datetime.today().month
@@ -118,7 +118,7 @@ def get_old_url(category_id, basedir='./data', FlagDir=1):
     while (FlagDir<10):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
-                % (basedir, category_id, now_year, now_month, now_day)
+                % (basedir, directorySeq, now_year, now_month, now_day)
         if os.path.exists('./%s' % targetpath):
             filename = max(os.listdir('./%s' % targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -141,40 +141,42 @@ def get_old_url(category_id, basedir='./data', FlagDir=1):
     return old_urls
 
 
-def crawl(category_id, version, ispopular=1, debug=False):
+def crawl(directorySeq, version, latestOnly=1, debug=False):
+    
     if debug:
         max_page = 3
     else:
         max_page = 100
 
-    category_id = int(category_id)
+    directorySeq = int(directorySeq)
     new_items = []
     new_urls = []
-    old_urls = get_old_url(category_id)
+    old_urls = get_old_url(directorySeq)
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
-        divs = get_page(URLBASE % (pagenum, category_id, ispopular))
+        divs = get_page(URLBASE % (pagenum, directorySeq, latestOnly))
         objs, flag = parse_page(divs, old_urls, version)
         objs_tags = extract_tag(objs)
         new_items.extend(objs_tags)
         pagenum += 1
         max_page -= 1
     if new_items != [] :
-        make_json(new_items, category_id, version)
+        make_json(new_items, directorySeq, version)
 
 
 if __name__ == '__main__':
+    
     import argparse
 
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c', '--category', required=True, dest='category_id',
+    parser.add_argument('-c', '--category', required=True, dest='directorySeq',
                          help='assign target category to crawl')
     parser.add_argument('-v', '--version', required=True, dest='version',
                          help='notice version of crawler')
-    parser.add_argument('-t', '--type', dest='ispopular',
+    parser.add_argument('-t', '--type', dest='latestOnly',
                          help='notice whether to crawl popular posts (1) or all posts (0)')
     args = parser.parse_args()
 
-    crawl(args.category_id, args.version, args.ispopular, debug=True)
+    crawl(args.directorySeq, args.version, args.latestOnly, debug=True)
