@@ -15,6 +15,9 @@ URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
           'option.viewType=default&option.orderBy=date&option.latestOnly=%s'
 
 
+get_today = lambda : datetime.now()
+
+
 def get_page(url):
 
     page = urllib2.urlopen(url)
@@ -34,7 +37,7 @@ def make_structure(div, crawler_version, encoding='utf-8'):
     extract_title  = lambda d: sanitize(d.find("a"))
     extract_url    = lambda d: d.find("a")['href']
     extract_writer = lambda d: sanitize(d.find("div", {"class": "list_data"}).find("a"))
-    extract_crawlerTime = lambda: datetime.now().strftime("%Y-%m-%d %H:%M")
+    extract_crawlerTime = lambda: get_today().strftime("%Y-%m-%d %H:%M")
 
     def extract_image(div):
         d = div.find("div", {"class": "multi_img"})
@@ -53,23 +56,22 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
             u"url": extract_url(div)}
-
+  
 
 def make_json(objs, directorySeq, version, basedir='./data'):
 
-    year = datetime.today().year
-    month = datetime.today().month
-    day = datetime.today().day
-    hour = datetime.today().hour
-    minute = datetime.today().minute
-    sec = datetime.today().second
+    today  = get_today()
+    hour   = today.hour
+    minute = today.minute
+    sec    = today.second
 
-    targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, directorySeq, year, month, day)
+    PATH = get_today().date().isoformat().replace("-", "/")
+    targetpath = '%s/%02d/%s/' % (basedir, directorySeq, PATH)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
 
-    filename = '%s/%s-%02d-%02d-%02d%02d%02d.json' \
-                    % (targetpath, year, month, day, hour, minute, sec)
+    filename = '%s/%s-%02d%02d%02d.json' \
+                    % (targetpath, get_today().date().isoformat(), hour, minute, sec)
 
     f = open(filename, 'w')
     jsonstr = json.dumps(objs, sort_keys=True, indent=4, encoding='utf-8')
@@ -111,9 +113,9 @@ def extract_tag(divs):
 
 def get_old_url(directorySeq, basedir='./data', FlagDir=1):
 
-    now_year = datetime.today().year
-    now_month = datetime.today().month
-    now_day = datetime.today().day
+    now_year = get_today().year
+    now_month = get_today().month
+    now_day = get_today().day
 
     while (FlagDir<10):
 
