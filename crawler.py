@@ -1,4 +1,5 @@
-#-*-coding:utf-8-*-
+#! /usr/bin/python2.7
+# -*-coding:utf-8-*-
 
 
 import json
