@@ -6,8 +6,7 @@ import os
 import urllib2
 
 from bs4 import BeautifulSoup
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
