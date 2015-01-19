@@ -28,8 +28,8 @@ def make_structure(div, crawler_version, encoding='utf-8'):
     sanitize = lambda s: s.get_text().encode(encoding).strip()
 
     extract_blog_id = lambda d: d.find("input", {"class": "vBlogId"})['value']
-    extract_date   = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
-    extract_log_no  = lambda d: d.find("input", {"class": "vLogNo"})['value']
+    extract_date    = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
+    extract_log_no = lambda d: d.find("input", {"class": "vLogNo"})['value']
     extract_text   = lambda d: sanitize(d.find("div", {"class":"list_content"}))
     extract_title  = lambda d: sanitize(d.find("a"))
     extract_url    = lambda d: d.find("a")['href']
@@ -55,7 +55,7 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"url": extract_url(div)}
 
 
-def make_json(objs, category_id, version, basedir='./data'):
+def make_json(objs, category_id, version, basedir):
 
     year = datetime.today().year
     month = datetime.today().month
@@ -109,7 +109,7 @@ def extract_tag(divs):
     return divs
 
 
-def get_old_url(category_id, basedir='./data', FlagDir=1):
+def get_old_url(category_id, basedir, FlagDir=1):
 
     now_year = datetime.today().year
     now_month = datetime.today().month
@@ -141,7 +141,7 @@ def get_old_url(category_id, basedir='./data', FlagDir=1):
     return old_urls
 
 
-def crawl(category_id, version, ispopular=1, debug=False):
+def crawl(category_id, basedir, version, ispopular=1, debug=False):
     if debug:
         max_page = 3
     else:
@@ -150,7 +150,7 @@ def crawl(category_id, version, ispopular=1, debug=False):
     category_id = int(category_id)
     new_items = []
     new_urls = []
-    old_urls = get_old_url(category_id)
+    old_urls = get_old_url(category_id, basedir=basedir)
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
@@ -161,7 +161,7 @@ def crawl(category_id, version, ispopular=1, debug=False):
         pagenum += 1
         max_page -= 1
     if new_items != [] :
-        make_json(new_items, category_id, version)
+        make_json(new_items, category_id, version, basedir=basedir)
 
 
 if __name__ == '__main__':
@@ -175,6 +175,11 @@ if __name__ == '__main__':
                          help='notice version of crawler')
     parser.add_argument('-t', '--type', dest='ispopular',
                          help='notice whether to crawl popular posts (1) or all posts (0)')
+    parser.add_argument('-p', '--path', dest='basedir',
+                         help='assign data path')
     args = parser.parse_args()
 
-    crawl(args.category_id, args.version, args.ispopular, debug=True)
+    if not args.basedir:
+        args.basedir = './data'
+
+    crawl(args.category_id, args.basedir, args.version, args.ispopular, debug=True)
