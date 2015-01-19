@@ -56,9 +56,9 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
             u"url": extract_url(div)}
-  
 
-def make_json(objs, directory_seq, version, basedir='./data'):
+
+def make_json(objs, directory_seq, version, basedir):
 
     today  = get_today()
     hour   = today.hour
@@ -66,7 +66,7 @@ def make_json(objs, directory_seq, version, basedir='./data'):
     sec    = today.second
 
     PATH = get_today().date().isoformat().replace("-", "/")
-    targetpath = '%s/%02d/%s/' % (basedir, directorySeq, PATH)
+    targetpath = '%s/%02d/%s/' % (basedir, directory_seq, PATH)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
 
@@ -113,7 +113,7 @@ def extract_tag(divs):
     return divs
 
 
-def get_old_url(directory_seq, basedir='./data', flag_dir=1):
+def get_old_url(directory_seq, basedir, flag_dir=1):
 
     today     = get_today()
     now_year  = today.year
@@ -146,8 +146,8 @@ def get_old_url(directory_seq, basedir='./data', flag_dir=1):
     return old_urls
 
 
-def crawl(directory_seq, version, latest_only=1, debug=False):
-    
+def crawl(directory_seq, basedir, version, latest_only=1, debug=False):
+
     if debug:
         max_page = 3
     else:
@@ -156,7 +156,7 @@ def crawl(directory_seq, version, latest_only=1, debug=False):
     directory_seq = int(directory_seq)
     new_items = []
     new_urls = []
-    old_urls = get_old_url(directory_seq)
+    old_urls = get_old_url(directory_seq, basedir)
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
@@ -167,21 +167,40 @@ def crawl(directory_seq, version, latest_only=1, debug=False):
         pagenum += 1
         max_page -= 1
     if new_items != [] :
-        make_json(new_items, directory_seq, version)
+        make_json(new_items, directory_seq, version, basedir)
 
 
 if __name__ == '__main__':
-    
+
     import argparse
 
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--category', required=True, dest='directory_seq',
                          help='assign target category to crawl')
-    parser.add_argument('-v', '--version', required=True, dest='version',
+    parser.add_argument('-v', '--version', dest='version',
                          help='notice version of crawler')
-    parser.add_argument('-t', '--type', dest='latest_only',
-                         help='notice whether to crawl popular posts (1) or all posts (0)')
+    parser.add_argument('-l', '--latest-only', dest='latest_only',
+                         help='option to crawl popular posts (1) or all posts (0)')
+    parser.add_argument('-t', '--type', dest='type',
+                         help='option to crawl popular posts (popular) or all posts (all)')
+    parser.add_argument('-p', '--path', dest='basedir',
+                         help='assign data path')
     args = parser.parse_args()
 
-    crawl(args.directory_seq, args.version, args.latest_only, debug=True)
+    if not args.basedir:
+        args.basedir = './data'
+
+    if not args.version:
+        with open('version.cfg', 'r') as f:
+            args.version = f.read()
+
+    if args.type:
+        if args.type=='all':
+            args.lastest_only = 0
+        elif args.type=='popular':
+            args.latest_only = 1
+        else:
+            raise Exception('Wrong type of argument for -t, --type')
+
+    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=True)
