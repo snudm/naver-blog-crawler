@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     if not args.version:
         with open('version.cfg', 'r') as f:
-            args.version = f.read()
+            args.version = f.read().strip()
 
     if args.type:
         if args.type=='all':
