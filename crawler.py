@@ -55,7 +55,7 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"url": extract_url(div)}
 
 
-def make_json(objs, category_id, version, basedir):
+def make_json(objs, directory_seq, version, basedir):
 
     year = datetime.today().year
     month = datetime.today().month
@@ -64,7 +64,7 @@ def make_json(objs, category_id, version, basedir):
     minute = datetime.today().minute
     sec = datetime.today().second
 
-    targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, category_id, year, month, day)
+    targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, directory_seq, year, month, day)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
 
@@ -109,7 +109,7 @@ def extract_tag(divs):
     return divs
 
 
-def get_old_url(category_id, basedir, FlagDir=1):
+def get_old_url(directory_seq, basedir, FlagDir=1):
 
     now_year = datetime.today().year
     now_month = datetime.today().month
@@ -118,7 +118,7 @@ def get_old_url(category_id, basedir, FlagDir=1):
     while (FlagDir<10):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
-                % (basedir, category_id, now_year, now_month, now_day)
+                % (basedir, directory_seq, now_year, now_month, now_day)
         if os.path.exists('./%s' % targetpath):
             filename = max(os.listdir('./%s' % targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -141,48 +141,61 @@ def get_old_url(category_id, basedir, FlagDir=1):
     return old_urls
 
 
-def crawl(category_id, basedir, version, ispopular=1, debug=False):
+def crawl(directory_seq, basedir, version, latest_only=1, debug=False):
+
     if debug:
         max_page = 3
     else:
         max_page = 100
 
-    category_id = int(category_id)
+    directory_seq = int(directory_seq)
     new_items = []
     new_urls = []
-    old_urls = get_old_url(category_id, basedir=basedir)
+    old_urls = get_old_url(directory_seq, basedir=basedir)
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
-        divs = get_page(URLBASE % (pagenum, category_id, ispopular))
+        divs = get_page(URLBASE % (pagenum, directory_seq, latest_only))
         objs, flag = parse_page(divs, old_urls, version)
         objs_tags = extract_tag(objs)
         new_items.extend(objs_tags)
         pagenum += 1
         max_page -= 1
     if new_items != [] :
-        make_json(new_items, category_id, version, basedir=basedir)
+        make_json(new_items, directory_seq, version, basedir=basedir)
 
 
 if __name__ == '__main__':
+
     import argparse
 
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c', '--category', required=True, dest='category_id',
+    parser.add_argument('-c', '--category', required=True, dest='directory_seq',
                          help='assign target category to crawl')
     parser.add_argument('-v', '--version', dest='version',
                          help='notice version of crawler')
-    parser.add_argument('-t', '--type', dest='ispopular',
-                         help='notice whether to crawl popular posts (1) or all posts (0)')
+    parser.add_argument('-l', '--latest-only', dest='latest_only',
+                         help='option to crawl popular posts (1) or all posts (0)')
+    parser.add_argument('-t', '--type', dest='type',
+                         help='option to crawl popular posts (popular) or all posts (all)')
     parser.add_argument('-p', '--path', dest='basedir',
                          help='assign data path')
     args = parser.parse_args()
 
     if not args.basedir:
         args.basedir = './data'
+
     if not args.version:
         with open('version.cfg', 'r') as f:
             args.version = f.read()
 
-    crawl(args.category_id, args.basedir, args.version, args.ispopular, debug=True)
+    if args.type:
+        if args.type=='all':
+            args.latest_only = 0
+        elif args.type=='popular':
+            args.latest_only = 1
+        else:
+            raise Exception('Wrong type of argument for -t, --type')
+
+    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=True)
