@@ -171,7 +171,7 @@ if __name__ == '__main__':
                         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--category', required=True, dest='category_id',
                          help='assign target category to crawl')
-    parser.add_argument('-v', '--version', required=True, dest='version',
+    parser.add_argument('-v', '--version', dest='version',
                          help='notice version of crawler')
     parser.add_argument('-t', '--type', dest='ispopular',
                          help='notice whether to crawl popular posts (1) or all posts (0)')
@@ -181,5 +181,8 @@ if __name__ == '__main__':
 
     if not args.basedir:
         args.basedir = './data'
+    if not args.version:
+        with open('version.cfg', 'r') as f:
+            args.version = f.read()
 
     crawl(args.category_id, args.basedir, args.version, args.ispopular, debug=True)
