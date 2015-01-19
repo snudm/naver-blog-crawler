@@ -55,11 +55,8 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"content": extract_text(div),
             u"crawledTime": extract_crawlerTime(),
             u"crawlerVersion": crawler_version,
-<<<<<<< HEAD
             u"images": [extract_image(div)],
-=======
             u"images": extract_image(div),
->>>>>>> 63066ed927e50118891c1417b8d517602018d9c1
             u"logNo": extract_log_no(div),
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
