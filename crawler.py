@@ -58,7 +58,7 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             u"url": extract_url(div)}
   
 
-def make_json(objs, directorySeq, version, basedir='./data'):
+def make_json(objs, directory_seq, version, basedir='./data'):
 
     today  = get_today()
     hour   = today.hour
@@ -71,7 +71,9 @@ def make_json(objs, directorySeq, version, basedir='./data'):
         os.makedirs(targetpath)
 
     filename = '%s/%s-%02d%02d%02d.json' \
-                    % (targetpath, get_today().date().isoformat(), hour, minute, sec)
+                    % (targetpath,
+                        get_today().date().isoformat(),
+                        hour, minute, sec)
 
     f = open(filename, 'w')
     jsonstr = json.dumps(objs, sort_keys=True, indent=4, encoding='utf-8')
@@ -111,16 +113,17 @@ def extract_tag(divs):
     return divs
 
 
-def get_old_url(directorySeq, basedir='./data', FlagDir=1):
+def get_old_url(directory_seq, basedir='./data', flag_dir=1):
 
-    now_year = get_today().year
-    now_month = get_today().month
-    now_day = get_today().day
+    today     = get_today()
+    now_year  = today.year
+    now_month = today.month
+    now_day   = today.day
 
-    while (FlagDir<10):
+    while (flag_dir<10):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
-                % (basedir, directorySeq, now_year, now_month, now_day)
+                % (basedir, directory_seq, now_year, now_month, now_day)
         if os.path.exists('./%s' % targetpath):
             filename = max(os.listdir('./%s' % targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -131,40 +134,40 @@ def get_old_url(directorySeq, basedir='./data', FlagDir=1):
                 old_urls.extend([data[i]['url']])
             break
         else:
-            yesterday = datetime.now().date() - timedelta(days=FlagDir)
-            FlagDir += 1
+            yesterday = datetime.now().date() - timedelta(days=flag_dir)
+            flag_dir += 1
         now_year = yesterday.year
         now_month = yesterday.month
         now_day = yesterday.day
 
-    if FlagDir == 10:
+    if flag_dir == 10:
             old_urls = []
 
     return old_urls
 
 
-def crawl(directorySeq, version, latestOnly=1, debug=False):
+def crawl(directory_seq, version, latest_only=1, debug=False):
     
     if debug:
         max_page = 3
     else:
         max_page = 100
 
-    directorySeq = int(directorySeq)
+    directory_seq = int(directory_seq)
     new_items = []
     new_urls = []
-    old_urls = get_old_url(directorySeq)
+    old_urls = get_old_url(directory_seq)
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
-        divs = get_page(URLBASE % (pagenum, directorySeq, latestOnly))
+        divs = get_page(URLBASE % (pagenum, directory_seq, latest_only))
         objs, flag = parse_page(divs, old_urls, version)
         objs_tags = extract_tag(objs)
         new_items.extend(objs_tags)
         pagenum += 1
         max_page -= 1
     if new_items != [] :
-        make_json(new_items, directorySeq, version)
+        make_json(new_items, directory_seq, version)
 
 
 if __name__ == '__main__':
@@ -173,12 +176,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c', '--category', required=True, dest='directorySeq',
+    parser.add_argument('-c', '--category', required=True, dest='directory_seq',
                          help='assign target category to crawl')
     parser.add_argument('-v', '--version', required=True, dest='version',
                          help='notice version of crawler')
-    parser.add_argument('-t', '--type', dest='latestOnly',
+    parser.add_argument('-t', '--type', dest='latest_only',
                          help='notice whether to crawl popular posts (1) or all posts (0)')
     args = parser.parse_args()
 
-    crawl(args.directorySeq, args.version, args.latestOnly, debug=True)
+    crawl(args.directory_seq, args.version, args.latest_only, debug=True)
