@@ -31,12 +31,12 @@ def make_structure(div, crawler_version, encoding='utf-8'):
     sanitize = lambda s: s.get_text().encode(encoding).strip()
 
     extract_blog_id = lambda d: d.find("input", {"class": "vBlogId"})['value']
-    extract_date   = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
+    extract_date    = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
     extract_log_no  = lambda d: d.find("input", {"class": "vLogNo"})['value']
-    extract_text   = lambda d: sanitize(d.find("div", {"class":"list_content"}))
-    extract_title  = lambda d: sanitize(d.find("a"))
-    extract_url    = lambda d: d.find("a")['href']
-    extract_writer = lambda d: sanitize(d.find("div", {"class": "list_data"}).find("a"))
+    extract_text    = lambda d: sanitize(d.find("div", {"class":"list_content"}))
+    extract_title   = lambda d: sanitize(d.find("a"))
+    extract_url     = lambda d: d.find("a")['href']
+    extract_writer  = lambda d: sanitize(d.find("div", {"class": "list_data"}).find("a"))
     extract_crawlerTime = lambda: get_today().strftime("%Y-%m-%d %H:%M")
 
     def extract_image(div):
