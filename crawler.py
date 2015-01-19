@@ -44,9 +44,12 @@ def make_structure(div, crawler_version, encoding='utf-8'):
         if not d:
             return []
         else:
-            dd = d.img['src'].encode(encoding)
-            return dd[:dd.find("?")]
-            
+            url = d.img['src'].encode(encoding)
+            if url.endswith("?type=s88"):
+                return url.rsplit("?", 1)[0]
+            else:
+                return url
+
     return {u"blogId": extract_blog_id(div),
             u"blogName": extract_writer(div),
             u"content": extract_text(div),
@@ -204,4 +207,4 @@ if __name__ == '__main__':
         else:
             raise Exception('Wrong type of argument for -t, --type')
 
-    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=True)
+    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=False)
