@@ -9,9 +9,11 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
 
+
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
           'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=%s&'\
           'option.viewType=default&option.orderBy=date&option.latestOnly=%s'
+
 
 def get_page(url):
 
@@ -20,47 +22,38 @@ def get_page(url):
     tmp_doc = doc.find("ul", {"class": "list_type_1"})
     return tmp_doc.find_all("li")
 
-def make_structure(div, crawler_version):
 
-    def extract_url(div):
-        return div.find("a")['href']
+def make_structure(div, crawler_version, encoding='utf-8'):
 
-    def extract_writer(div):
-        return div.find("div", {"class": "list_data"}).find("a").get_text().encode('utf-8')
+    sanitize = lambda s: s.get_text().encode(encoding).strip()
+
+    extract_blogId = lambda d: d.find("input", {"class": "vBlogId"})['value']
+    extract_date   = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
+    extract_logNo  = lambda d: d.find("input", {"class": "vLogNo"})['value']
+    extract_text   = lambda d: sanitize(d.find("div", {"class":"list_content"}))
+    extract_title  = lambda d: sanitize(d.find("a"))
+    extract_url    = lambda d: d.find("a")['href']
+    extract_writer = lambda d: sanitize(d.find("div", {"class": "list_data"}).find("a"))
+    extract_crawlerTime = lambda: datetime.now().strftime("%Y-%m-%d %H:%M")
 
     def extract_image(div):
-        if div.find("div", {"class": "multi_img"}) is None:
+        d = div.find("div", {"class": "multi_img"})
+        if not d:
             return []
         else:
-            return div.find("div", {"class": "multi_img"}).img['src'].encode('utf-8')
+            return d.img['src'].encode(encoding)
 
-    def extract_title(div):
-        return div.find("a").get_text().encode('utf-8')
-
-    def extract_date(div):
-        return div.find("span", {"class": "date"}).get_text().encode('utf-8').replace(".", "-")
-
-    def extract_text(div):
-        return div.find("div", {"class":"list_content"}).get_text().encode('utf-8').strip()
-
-    def extract_blogId(div):
-        return div.find("input", {"class": "vBlogId"})['value']
-
-    def extract_logNo(div):
-        return div.find("input", {"class": "vLogNo"})['value']
-    def extract_crawlerTime():
-        return datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    return {u"url": extract_url(div),
+    return {u"blogId": extract_blogId(div),
             u"blogName": extract_writer(div),
-            u"writtenTime": extract_date(div),
-            u"title": extract_title(div),
             u"content": extract_text(div),
-            u"images": [{u"url":extract_image(div)}],
-            u"blogId": extract_blogId(div),
-            u"logNo": extract_logNo(div),
             u"crawledTime": extract_crawlerTime(),
-            u"crawlerVersion": crawler_version}
+            u"crawlerVersion": crawler_version,
+            u"images": [{u"url":extract_image(div)}],
+            u"logNo": extract_logNo(div),
+            u"title": extract_title(div),
+            u"writtenTime": extract_date(div),
+            u"url": extract_url(div)}
+
 
 def make_json(objs, category_id, version, basedir='./data'):
 
@@ -83,11 +76,11 @@ def make_json(objs, category_id, version, basedir='./data'):
     f.write(jsonstr)
     f.close()
 
+
 def parse_page(divs, old_urls, version):
 
     objs = []
     flag = True
-
     for i, div in enumerate(divs):
         obj = make_structure(div, version)
         if obj['url'] in old_urls:
@@ -97,16 +90,15 @@ def parse_page(divs, old_urls, version):
             objs.append(obj)
     return (objs, flag)
 
+
 def extract_tag(divs):
 
-    blog_ids, log_nos = [], []
-
+    ids = []
     for obj in divs:
-        blog_ids.append(obj['blogId'])
-        log_nos.append(obj['logNo'])
+        ids.append((obj['blogId'], obj['logNo']))
 
     join_str = ','.join("{\"blogId\":\"%s\",\"logNo\":\"%s\"}" \
-                    % (b, l) for b, l in zip(blog_ids, log_nos))
+                    % (b, l) for b, l in ids)
 
     tags_url = 'http://section.blog.naver.com/TagSearchAsync.nhn?variables=[%s]' % join_str
     response = urllib2.urlopen(tags_url)
@@ -116,16 +108,17 @@ def extract_tag(divs):
         divs[i]["tags"] = obj['tags']
     return divs
 
-def get_old_url(category_id, basedir='./data'):
+
+def get_old_url(category_id, basedir='./data', FlagDir=1):
 
     now_year = datetime.today().year
     now_month = datetime.today().month
     now_day = datetime.today().day
 
-    FlagDir = 1
     while (FlagDir<10):
 
-        targetpath = '%s/%02d/%s/%02d/%02d' % (basedir, category_id, now_year, now_month, now_day)
+        targetpath = '%s/%02d/%s/%02d/%02d'\
+                % (basedir, category_id, now_year, now_month, now_day)
         if os.path.exists('./%s' % targetpath):
             filename = max(os.listdir('./%s' % targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -147,6 +140,7 @@ def get_old_url(category_id, basedir='./data'):
 
     return old_urls
 
+
 def crawl(category_id, version, ispopular=1, debug=False):
     if debug:
         max_page = 3
@@ -154,7 +148,6 @@ def crawl(category_id, version, ispopular=1, debug=False):
         max_page = 100
 
     category_id = int(category_id)
-    # TODO: auto assign `page_need`
     new_items = []
     new_urls = []
     old_urls = get_old_url(category_id)
@@ -169,6 +162,7 @@ def crawl(category_id, version, ispopular=1, debug=False):
         max_page -= 1
     if new_items != [] :
         make_json(new_items, category_id, version)
+
 
 if __name__ == '__main__':
     import argparse
