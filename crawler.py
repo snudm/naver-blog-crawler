@@ -27,9 +27,9 @@ def make_structure(div, crawler_version, encoding='utf-8'):
 
     sanitize = lambda s: s.get_text().encode(encoding).strip()
 
-    extract_blogId = lambda d: d.find("input", {"class": "vBlogId"})['value']
+    extract_blog_id = lambda d: d.find("input", {"class": "vBlogId"})['value']
     extract_date   = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
-    extract_logNo  = lambda d: d.find("input", {"class": "vLogNo"})['value']
+    extract_log_no  = lambda d: d.find("input", {"class": "vLogNo"})['value']
     extract_text   = lambda d: sanitize(d.find("div", {"class":"list_content"}))
     extract_title  = lambda d: sanitize(d.find("a"))
     extract_url    = lambda d: d.find("a")['href']
@@ -43,13 +43,13 @@ def make_structure(div, crawler_version, encoding='utf-8'):
         else:
             return d.img['src'].encode(encoding)
 
-    return {u"blogId": extract_blogId(div),
+    return {u"blogId": extract_blog_id(div),
             u"blogName": extract_writer(div),
             u"content": extract_text(div),
             u"crawledTime": extract_crawlerTime(),
             u"crawlerVersion": crawler_version,
             u"images": [{u"url":extract_image(div)}],
-            u"logNo": extract_logNo(div),
+            u"logNo": extract_log_no(div),
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
             u"url": extract_url(div)}
