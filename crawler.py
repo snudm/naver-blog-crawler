@@ -46,16 +46,16 @@ def make_structure(div, crawler_version, encoding='utf-8'):
         else:
             url = d.img['src'].encode(encoding)
             if url.endswith("?type=s88"):
-                return url.rsplit("?", 1)[0]
+                return [url.rsplit("?", 1)[0]]
             else:
-                return url
+                return [url]
 
     return {u"blogId": extract_blog_id(div),
             u"blogName": extract_writer(div),
             u"content": extract_text(div),
             u"crawledTime": extract_crawlerTime(),
             u"crawlerVersion": crawler_version,
-            u"images": [extract_image(div)],
+            u"images": extract_image(div),
             u"logNo": extract_log_no(div),
             u"title": extract_title(div),
             u"writtenTime": extract_date(div),
@@ -125,8 +125,8 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
                 % (basedir, directory_seq, now_year, now_month, now_day)
-        if os.path.exists('./%s' % targetpath):
-            filename = max(os.listdir('./%s' % targetpath))
+        if os.path.exists(targetpath):
+            filename = max(os.listdir(targetpath))
             PATH = '%s/%s' % (targetpath, filename)
             json_data = open(PATH).read()
             data = json.loads(json_data)
