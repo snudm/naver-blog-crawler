@@ -65,9 +65,6 @@ def make_structure(div, crawler_version, encoding='utf-8'):
 def make_json(objs, directory_seq, version, basedir):
 
     today  = get_today()
-    hour   = today.hour
-    minute = today.minute
-    sec    = today.second
 
     PATH = get_today().date().isoformat().replace("-", "/")
     targetpath = '%s/%02d/%s/' % (basedir, directory_seq, PATH)
@@ -77,7 +74,7 @@ def make_json(objs, directory_seq, version, basedir):
     filename = '%s/%s-%02d%02d%02d.json' \
                     % (targetpath,
                         get_today().date().isoformat(),
-                        hour, minute, sec)
+                        today.hour, today.minute, today.second)
 
     f = open(filename, 'w')
     jsonstr = json.dumps(objs, sort_keys=True, indent=4, encoding='utf-8')
@@ -146,7 +143,6 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
 
     if flag_dir == 10:
             old_urls = []
-
     return old_urls
 
 
