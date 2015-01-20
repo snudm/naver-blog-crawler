@@ -67,7 +67,7 @@ def make_json(objs, directory_seq, version, basedir):
     today  = get_today()
 
     PATH = get_today().date().isoformat().replace("-", "/")
-    targetpath = '%s/%02d/%s/' % (basedir, directory_seq, PATH)
+    targetpath = '%s/%02d/%s' % (basedir, directory_seq, PATH)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
 
@@ -125,6 +125,7 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
                 % (basedir, directory_seq, now_year, now_month, now_day)
+        
         if os.path.exists(targetpath):
             filename = max(os.listdir(targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -132,7 +133,7 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
             data = json.loads(json_data)
             old_urls =[]
             for i, blog in enumerate(data):
-                old_urls.extend([data[i]['url']])
+                old_urls.append(data[i]['url'])
             break
         else:
             yesterday = datetime.now().date() - timedelta(days=flag_dir)
