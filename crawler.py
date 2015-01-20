@@ -142,7 +142,7 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
         now_day = yesterday.day
 
     if flag_dir == 10:
-            old_urls = []
+        old_urls = []
     return old_urls
 
 
