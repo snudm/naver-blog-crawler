@@ -7,6 +7,8 @@
     - `directoryseq`: 5 ~ 36까지의 category로 구성됨. (`category` 옵션을 이용해 입력)
         ex) 5: "문학, 책", 6:"영화" (`section_information.json` 참고)
     - `latestOnly`: binary 변수. 1= 주목받는 글, 0= 전체 글 (`latest-only` 또는 `type` 옵션을 이용해 입력)
+    
+    * 각 directory별로 12시간 내의 블로그를 가지고 있음 
 
 ## Requirements
 
