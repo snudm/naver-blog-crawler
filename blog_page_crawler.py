@@ -86,7 +86,7 @@ def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "lo
     f.write(url)
     f.close()
 
-def web_crawl(blog_id, log_no, crawled_time, crawler_version, title, 
+def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
                         written_time, url, tags, date, directory_seq, basedir):
     (raw, doc) = get_page(URLBASE % (blog_id, log_no))
     if doc != None:
@@ -104,10 +104,13 @@ def file_read(filename):
 
 def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="texts"):
     directory_seq = int(directory_seq)
-    targetpath = '%s/%s/%02d/%s/%02d/%02d'\
+    try:
+        targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                          % (basedir, seconddir, directory_seq,\
                             int(date[0:4]), int(date[5:7]), int(date[8:10]))
-   
+    except TypeError:
+        raise Exception('Please check input values (ex: the date)')
+
     filenames = glob.glob('%s/*.json' % targetpath)
     for filename in reversed(filenames):
         items = file_read(filename)
