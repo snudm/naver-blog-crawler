@@ -204,4 +204,4 @@ if __name__ == '__main__':
         else:
             raise Exception('Wrong type of argument for -t, --type')
 
-    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=True)
+    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=False)
