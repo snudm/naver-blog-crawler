@@ -2,13 +2,15 @@
 # -*-coding:utf-8-*-
 
 
+from datetime import datetime, timedelta
 import json
 import os
 import glob
 import urllib2
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+
+from utils import checkdir
 
 REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
 
@@ -21,7 +23,7 @@ def get_reply(url):
 
 def make_structure(blog_id, log_no, written_time, replies, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
-  
+
     def reply_json(reply):
         if reply.find("p") != None and reply.find("div", {"class":"dsc_id"}) != None:
             return {u"content": reply.find("p").get_text(),
@@ -52,8 +54,7 @@ def make_structure(blog_id, log_no, written_time, replies, encoding='utf-8'):
 def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "comments"):
     PATH = '%s/%02d/%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
     targetpath = '%s/%s/%02d/%s' % (basedir, seconddir, directory_seq, PATH)
-    if not os.path.exists(targetpath):
-        os.makedirs(targetpath)
+    checkdir(targetpath)
     filename = '%s/%s-%s.json' % (targetpath, blog_id, log_no)
     f        = open(filename, 'w')
     jsonstr  = json.dumps(blog, sort_keys=True, indent=4, encoding='utf-8')
@@ -62,8 +63,7 @@ def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "
 
 def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "logs"):
     targetpath = '%s/%s' % (basedir, seconddir)
-    if not os.path.exists(targetpath):
-        os.makedirs(targetpath)
+    checkdir(targetpath)
     filename = '%s/error_url_comment_%s-%02d-%02d.txt' % (targetpath, int(date[0:4]), int(date[5:7]), int(date[8:10]))
     f   = open(filename, 'a')
     url = '%s, http://m.blog.naver.com/%s/%s, access denied\n' % (directory_seq, blog_id, log_no)
@@ -88,7 +88,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
     targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                          % (basedir, seconddir, directory_seq,\
                             int(date[0:4]), int(date[5:7]), int(date[8:10]))
-   
+
     filenames = glob.glob('%s/*.json' % targetpath)
     for filename in reversed(filenames):
         items = file_read(filename)
@@ -98,7 +98,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                                int(date[0:4]), int(date[5:7]), int(date[8:10]))
             check_filename = '%s-%s.json' % (items[i]['blogId'], items[i]['logNo'])
             if not os.path.isfile('%s/%s' % (check_targetpath, check_filename)):
-                comment_crawl(items[i]['blogId'], 
+                comment_crawl(items[i]['blogId'],
                               items[i]['logNo'],
                               items[i]['writtenTime'],
                               date, directory_seq, basedir)
