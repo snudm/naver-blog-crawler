@@ -2,13 +2,16 @@
 # -*-coding:utf-8-*-
 
 
+from datetime import datetime, timedelta
 import json
 import os
 import glob
 import urllib2
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+
+from utils import checkdir
+
 
 URLBASE = 'http://m.blog.naver.com/%s/%s'
 
@@ -61,8 +64,7 @@ def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
 def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "texts"):
     PATH = '%s/%02d/%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
     targetpath = '%s/%s/%02d/%s' % (basedir, seconddir, directory_seq, PATH)
-    if not os.path.exists(targetpath):
-        os.makedirs(targetpath)
+    checkdir(targetpath)
     filename = '%s/%s-%s.json' % (targetpath, blog_id, log_no)
     f        = open(filename, 'w')
     jsonstr  = json.dumps(blog, sort_keys=True, indent=4, encoding='utf-8')
@@ -71,6 +73,7 @@ def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "
 
 def count_images(blog, directory_seq, basedir, seconddir = "logs"):
     targetpath = '%s/%s' % (basedir, seconddir)
+    checkdir(targetpath)
     filename = '%s/count_images_%02d.txt' % (targetpath, directory_seq)
     f = open(filename, 'a')
     f.write(str(len(blog["images"]))+'\n')
@@ -78,8 +81,7 @@ def count_images(blog, directory_seq, basedir, seconddir = "logs"):
 
 def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "logs"):
     targetpath = '%s/%s' % (basedir, seconddir)
-    if not os.path.exists(targetpath):
-        os.makedirs(targetpath)
+    checkdir(targetpath)
     filename = '%s/error_url_%s-%02d-%02d.txt' % (targetpath, int(date[0:4]), int(date[5:7]), int(date[8:10]))
     f   = open(filename, 'a')
     url = '%s, http://m.blog.naver.com/%s/%s, access denied\n' % (directory_seq, blog_id, log_no)
