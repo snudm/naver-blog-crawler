@@ -125,7 +125,7 @@ def get_old_url(directory_seq, basedir, flag_dir=1):
 
         targetpath = '%s/%02d/%s/%02d/%02d'\
                 % (basedir, directory_seq, now_year, now_month, now_day)
-        
+
         if os.path.exists(targetpath):
             filename = max(os.listdir(targetpath))
             PATH = '%s/%s' % (targetpath, filename)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not args.basedir:
-        args.basedir = './data'
+        args.basedir = './data/lists'
 
     if not args.version:
         with open('version.cfg', 'r') as f:
@@ -204,4 +204,4 @@ if __name__ == '__main__':
         else:
             raise Exception('Wrong type of argument for -t, --type')
 
-    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=False)
+    crawl(args.directory_seq, args.basedir, args.version, args.latest_only, debug=True)

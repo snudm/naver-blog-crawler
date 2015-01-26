@@ -19,7 +19,7 @@ def get_page(url):
     page = urllib2.urlopen(url)
     doc  = BeautifulSoup(page.read())
     return (doc, doc.find("div", {"class": "_postView"}))
-  
+
 def get_reply(url):
     page = urllib2.urlopen(url)
     doc  = BeautifulSoup(page.read())
@@ -29,7 +29,7 @@ def make_structure(blog_id, log_no, raw, doc, replies, crawled_time, crawler_ver
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
     extract_category     = lambda doc: doc.find("a", {"class": "_categoryName"}).get_text().encode(encoding)
     extract_content_html = lambda doc: doc.find("div", {"id": "viewTypeSelector"})
-   
+
     def extract_sympathycount(doc):
         if doc.find("em", {"id": "sympathyCount"}) == None:
             return 0
@@ -41,7 +41,7 @@ def make_structure(blog_id, log_no, raw, doc, replies, crawled_time, crawler_ver
             return {u"content": reply.find("p").get_text(),
                     u"date": reply.find("span").get_text().encode("utf"),
                     u"blogId": reply.find("div", {"class":"dsc_id"}).find("a")["href"].rsplit("blogId=", 1)[1]}
-        
+
     def extract_reply(replies):
         all_replies = []
         for reply in range(0, len(replies)):
@@ -50,10 +50,10 @@ def make_structure(blog_id, log_no, raw, doc, replies, crawled_time, crawler_ver
                 retmp = replies[reply].find_all("ul", {"class":"lst_repl_sub"})
                 re_replies = []
                 for re in range(0, len(retmp)):
-                    if reply_json(retmp[re]) != None: 
+                    if reply_json(retmp[re]) != None:
                         re_replies.append(reply_json(retmp[re]))
                 if re_replies != []:
-                    tmp["reReply"] = re_replies 
+                    tmp["reReply"] = re_replies
                 all_replies.append(tmp)
         return all_replies
 
@@ -158,10 +158,10 @@ def return_information(directory_seq, basedir, seconddir ="lists"):
             for i, blog in enumerate(divs):
                 this_url = 'http://m.blog.naver.com/%s/%s' % (divs[i]['blogId'], divs[i]['logNo'])
                 if url == [] or flag == 1:
-                    web_crawl(divs[i]['blogId'], divs[i]['logNo'], 
+                    web_crawl(divs[i]['blogId'], divs[i]['logNo'],
                                     divs[i]['crawledTime'], divs[i]['crawlerVersion'], directory_seq, basedir)
                 elif url == this_url:
-                    web_crawl(divs[i]['blogId'], divs[i]['logNo'], 
+                    web_crawl(divs[i]['blogId'], divs[i]['logNo'],
                                     divs[i]['crawledTime'], divs[i]['crawlerVersion'], directory_seq, basedir)
                     flag = 1
         day += 1
@@ -178,9 +178,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--path', dest='basedir',
                          help='assign data path')
     args = parser.parse_args()
-    
+
     if not args.basedir:
-        args.basedir = './naver-blog'
+        args.basedir = './data'
 
     return_information(args.directory_seq, args.basedir)
-    
+
