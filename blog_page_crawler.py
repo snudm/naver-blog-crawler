@@ -101,7 +101,7 @@ def last_log_url(blog_id, log_no, directory_seq, basedir, seconddir = "logs"):
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
     f = open(filename, 'w')
-    url = 'http://m.blog.naver.com/%s/%s' % (blog_id, log_no)
+    url = URLBASE % (blog_id, log_no)
     f.write(url)
     f.close()
 
@@ -137,8 +137,8 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, directory_seq, bas
     else:
         error_log_url(blog_id, log_no, directory_seq, basedir)
 
-def file_read(file):
-   json_data = open(file)
+def file_read(filename):
+   json_data = open(filename)
    data = json.load(json_data)
    return data
 
@@ -149,20 +149,31 @@ def return_information(directory_seq, basedir, seconddir ="lists"):
     targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                          % (basedir, seconddir, directory_seq, now.year, now.month, now.day)
     flag = 0
-    url = find_url_position(directory_seq, basedir)
-    while(os.path.exists('./%s' % targetpath)):
-        path = '%s/*.json' % targetpath
-        files = glob.glob(path)
-        for file in files:
-            divs = file_read(file)
-            for i, blog in enumerate(divs):
-                this_url = 'http://m.blog.naver.com/%s/%s' % (divs[i]['blogId'], divs[i]['logNo'])
-                if url == [] or flag == 1:
-                    web_crawl(divs[i]['blogId'], divs[i]['logNo'],
-                                    divs[i]['crawledTime'], divs[i]['crawlerVersion'], directory_seq, basedir)
-                elif url == this_url:
-                    web_crawl(divs[i]['blogId'], divs[i]['logNo'],
-                                    divs[i]['crawledTime'], divs[i]['crawlerVersion'], directory_seq, basedir)
+    last_url = find_url_position(directory_seq, basedir)
+    while(os.path.exists(targetpath)):
+        filenames = glob.glob('%s/*.json' % targetpath)
+        for filename in filenames:
+            items = file_read(filename)
+            for i, blog in enumerate(items):
+                current_url = URLBASE % (items[i]['blogId'], items[i]['logNo'])
+
+                # last url text file = empty or after meeting last url change
+                if last_url == [] or flag == 1:
+                    web_crawl(items[i]['blogId'],
+                              items[i]['logNo'],
+                              items[i]['crawledTime'],
+                              items[i]['crawlerVersion'],
+                              directory_seq,
+                              basedir)
+
+                elif last_url == current_url:
+                    web_crawl(items[i]['blogId'],
+                              items[i]['logNo'],
+                              items[i]['crawledTime'],
+                              items[i]['crawlerVersion'],
+                              directory_seq,
+                              basedir)
+
                     flag = 1
         day += 1
         today  = now.date() - timedelta(days=day)

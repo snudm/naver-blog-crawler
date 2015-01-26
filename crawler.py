@@ -26,7 +26,7 @@ def get_page(url):
     return tmp_doc.find_all("li")
 
 
-def make_structure(div, crawler_version, encoding='utf-8'):
+def make_structure(item, crawler_version, encoding='utf-8'):
 
     sanitize = lambda s: s.get_text().encode(encoding).strip()
 
@@ -39,8 +39,8 @@ def make_structure(div, crawler_version, encoding='utf-8'):
     extract_writer  = lambda d: sanitize(d.find("div", {"class": "list_data"}).find("a"))
     extract_crawlerTime = lambda: get_today().strftime("%Y-%m-%d %H:%M")
 
-    def extract_image(div):
-        d = div.find("div", {"class": "multi_img"})
+    def extract_image(item):
+        d = item.find("div", {"class": "multi_img"})
         if not d:
             return []
         else:
@@ -50,16 +50,16 @@ def make_structure(div, crawler_version, encoding='utf-8'):
             else:
                 return [url]
 
-    return {u"blogId": extract_blog_id(div),
-            u"blogName": extract_writer(div),
-            u"content": extract_text(div),
+    return {u"blogId": extract_blog_id(item),
+            u"blogName": extract_writer(item),
+            u"content": extract_text(item),
             u"crawledTime": extract_crawlerTime(),
             u"crawlerVersion": crawler_version,
-            u"images": extract_image(div),
-            u"logNo": extract_log_no(div),
-            u"title": extract_title(div),
-            u"writtenTime": extract_date(div),
-            u"url": extract_url(div)}
+            u"images": extract_image(item),
+            u"logNo": extract_log_no(item),
+            u"title": extract_title(item),
+            u"writtenTime": extract_date(item),
+            u"url": extract_url(item)}
 
 
 def make_json(objs, directory_seq, version, basedir):
@@ -82,12 +82,12 @@ def make_json(objs, directory_seq, version, basedir):
     f.close()
 
 
-def parse_page(divs, old_urls, version):
+def parse_page(items, old_urls, version):
 
     objs = []
     flag = True
-    for i, div in enumerate(divs):
-        obj = make_structure(div, version)
+    for i, item in enumerate(items):
+        obj = make_structure(item, version)
         if obj['url'] in old_urls:
             flag = False
             break
@@ -96,10 +96,10 @@ def parse_page(divs, old_urls, version):
     return (objs, flag)
 
 
-def extract_tag(divs):
+def extract_tag(items):
 
     ids = []
-    for obj in divs:
+    for obj in items:
         ids.append((obj['blogId'], obj['logNo']))
 
     join_str = ','.join("{\"blogId\":\"%s\",\"logNo\":\"%s\"}" \
@@ -110,8 +110,8 @@ def extract_tag(divs):
     html = json.loads(response.read())
 
     for i, obj in enumerate(html):
-        divs[i]["tags"] = obj['tags']
-    return divs
+        items[i]["tags"] = obj['tags']
+    return items
 
 
 def get_old_url(directory_seq, basedir, flag_dir=1):
@@ -161,8 +161,8 @@ def crawl(directory_seq, basedir, version, latest_only=1, debug=False):
     pagenum = 1
     flag = True
     while(flag == True and max_page >= 1):
-        divs = get_page(URLBASE % (pagenum, directory_seq, latest_only))
-        objs, flag = parse_page(divs, old_urls, version)
+        items = get_page(URLBASE % (pagenum, directory_seq, latest_only))
+        objs, flag = parse_page(items, old_urls, version)
         objs_tags = extract_tag(objs)
         new_items.extend(objs_tags)
         pagenum += 1
