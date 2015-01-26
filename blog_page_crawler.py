@@ -58,8 +58,8 @@ def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
             u"sympathyCount": extract_sympathycount(doc),
             u"images": extract_images()}
 
-def make_json(blog, blog_id, log_no, directory_seq, basedir, seconddir = "texts"):
-    PATH = get_today().date().isoformat().replace("-", "/")
+def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "texts"):
+    PATH = '%s/%02d/%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
     targetpath = '%s/%s/%02d/%s' % (basedir, seconddir, directory_seq, PATH)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
@@ -76,27 +76,26 @@ def count_images(blog, directory_seq, basedir, seconddir = "logs"):
     f.write(str(len(blog["images"]))+'\n')
     f.close()
 
-def error_log_url(blog_id, log_no, directory_seq, basedir, seconddir = "logs"):
-    now = datetime.now()
+def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "logs"):
     targetpath = '%s/%s' % (basedir, seconddir)
     if not os.path.exists(targetpath):
         os.makedirs(targetpath)
-    filename = '%s/error_url_%s-%02d-%02d.txt' % (targetpath, now.year, now.month, now.day)
+    filename = '%s/error_url_%s-%02d-%02d.txt' % (targetpath, int(date[0:4]), int(date[5:7]), int(date[8:10]))
     f   = open(filename, 'a')
     url = '%s, http://m.blog.naver.com/%s/%s, access denied\n' % (directory_seq, blog_id, log_no)
     f.write(url)
     f.close()
 
 def web_crawl(blog_id, log_no, crawled_time, crawler_version, title, 
-                        written_time, url, tags, directory_seq, basedir):
+                        written_time, url, tags, date, directory_seq, basedir):
     (raw, doc) = get_page(URLBASE % (blog_id, log_no))
     if doc != None:
         blog = make_structure(blog_id, log_no, raw, doc, crawled_time,
                         crawler_version, title, written_time, url, tags)
         count_images(blog, directory_seq, basedir)
-        make_json(blog, blog_id, log_no,directory_seq, basedir)
+        make_json(blog, blog_id, log_no, date, directory_seq, basedir)
     else:
-        error_log_url(blog_id, log_no, directory_seq, basedir)
+        error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
 def file_read(filename):
    json_data = open(filename)
@@ -126,6 +125,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                           items[i]['writtenTime'],
                           items[i]['url'],
                           items[i]['tags'],
+                          date,
                           directory_seq,
                           basedir)
 
