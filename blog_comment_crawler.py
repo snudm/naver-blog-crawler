@@ -25,7 +25,7 @@ def make_structure(blog_id, log_no, written_time, replies, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
 
     def reply_json(reply):
-        if reply.find("p") != None and reply.find("div", {"class":"dsc_id"}) != None:
+        if reply.find("p") and reply.find("div", {"class":"dsc_id"}).find("a"):
             return {u"content": reply.find("p").get_text(),
                     u"date": reply.find("span").get_text().encode("utf"),
                     u"blogId": reply.find("div", {"class":"dsc_id"}).find("a")["href"].rsplit("blogId=", 1)[1]}
