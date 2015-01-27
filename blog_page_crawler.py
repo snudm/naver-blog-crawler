@@ -112,7 +112,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
         raise Exception('Please check input values (ex: the date)')
 
     filenames = glob.glob('%s/*.json' % targetpath)
-    for filename in filenames.sort(reverse=True):
+    for filename in filenames:
         print filename
         items = file_read(filename)
         for i, blog in enumerate(items):
