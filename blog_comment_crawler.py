@@ -75,8 +75,11 @@ def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "lo
     f.write(url)
     f.close()
 
-def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir):
-    reply_doc = get_reply(REPLY_URLBASE % (blog_id, log_no))
+def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, debug=False):
+    url = REPLY_URLBASE % (blog_id, log_no)
+    if debug:
+        print url
+    reply_doc = get_reply(url)
     if reply_doc != None:
         blog = make_structure(blog_id, log_no, written_time, reply_doc)
         make_json(blog, blog_id, log_no, date, directory_seq, basedir)
@@ -96,8 +99,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
 
     filenames = glob.glob('%s/*.json' % targetpath)
     for filename in reversed(filenames):
-        if debug:
-            print filename
+        print filename
         items = file_read(filename)
         for i, blog in enumerate(items):
             check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -108,7 +110,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                 comment_crawl(items[i]['blogId'],
                               items[i]['logNo'],
                               items[i]['writtenTime'],
-                              date, directory_seq, basedir)
+                              date, directory_seq, basedir, debug=debug)
 
 if __name__ == '__main__':
     import argparse
@@ -120,7 +122,7 @@ if __name__ == '__main__':
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
-    parser.add_argument('--debug', dest='debug',
+    parser.add_argument('--debug', dest='debug', action='store_true',
                          help='enable debug mode')
     args = parser.parse_args()
 
