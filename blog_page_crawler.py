@@ -22,11 +22,6 @@ def get_page(url):
     doc  = BeautifulSoup(page.read())
     return (doc, doc.find("div", {"class": "_postView"}))
 
-def get_reply(url):
-    page = urllib2.urlopen(url)
-    doc  = BeautifulSoup(page.read())
-    return doc.find_all("li", {"class": "persc"})
-
 def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
                                      title, written_time, url, tags, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
@@ -89,8 +84,11 @@ def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "lo
     f.close()
 
 def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
-                        written_time, url, tags, date, directory_seq, basedir):
-    (raw, doc) = get_page(URLBASE % (blog_id, log_no))
+                        written_time, url, tags, date, directory_seq, basedir, debug=False):
+    url = URLBASE % (blog_id, log_no)
+    (raw, doc) = get_page(url)
+    if debug:
+        print url
     if doc != None:
         blog = make_structure(blog_id, log_no, raw, doc, crawled_time,
                         crawler_version, title, written_time, url, tags)
@@ -104,7 +102,7 @@ def file_read(filename):
    data = json.load(json_data)
    return data
 
-def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="texts"):
+def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="texts", debug=False):
     directory_seq = int(directory_seq)
     try:
         targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -114,7 +112,8 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
         raise Exception('Please check input values (ex: the date)')
 
     filenames = glob.glob('%s/*.json' % targetpath)
-    for filename in reversed(filenames):
+    for filename in filenames.sort(reversed=True):
+        print filename
         items = file_read(filename)
         for i, blog in enumerate(items):
             check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -132,7 +131,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                           items[i]['tags'],
                           date,
                           directory_seq,
-                          basedir)
+                          basedir, debug=debug)
 
 if __name__ == '__main__':
     import argparse
@@ -144,10 +143,16 @@ if __name__ == '__main__':
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
+    parser.add_argument('--debug', dest='debug', action='store_true',
+                         help='enable debug mode')
     args = parser.parse_args()
 
     if not args.basedir:
         args.basedir = './data'
+    if args.debug:
+        debug = True
+    else:
+        debug = False
 
-    return_information(args.directory_seq, args.basedir, args.date)
+    return_information(args.directory_seq, args.basedir, args.date, debug=debug)
 
