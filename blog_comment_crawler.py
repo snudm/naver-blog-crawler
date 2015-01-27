@@ -98,7 +98,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                             int(date[0:4]), int(date[5:7]), int(date[8:10]))
 
     filenames = glob.glob('%s/*.json' % targetpath)
-    for filename in filenames.sort(reversed=True):
+    for filename in filenames.sort(reverse=True):
         print filename
         items = file_read(filename)
         for i, blog in enumerate(items):
