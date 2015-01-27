@@ -88,7 +88,7 @@ def file_read(filename):
    data = json.load(json_data)
    return data
 
-def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="comments"):
+def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="comments", debug=False):
     directory_seq = int(directory_seq)
     targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                          % (basedir, seconddir, directory_seq,\
@@ -96,6 +96,8 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
 
     filenames = glob.glob('%s/*.json' % targetpath)
     for filename in reversed(filenames):
+        if debug:
+            print filename
         items = file_read(filename)
         for i, blog in enumerate(items):
             check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -118,10 +120,17 @@ if __name__ == '__main__':
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
+    parser.add_argument('--debug', dest='debug',
+                         help='enable debug mode')
     args = parser.parse_args()
 
     if not args.basedir:
         args.basedir = './data'
 
-    return_information(args.directory_seq, args.basedir, args.date)
+    if args.debug:
+        debug = True
+    else:
+        debug = False
+
+    return_information(args.directory_seq, args.basedir, args.date, debug=debug)
 
