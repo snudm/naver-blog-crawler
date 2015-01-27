@@ -110,11 +110,12 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                             int(date[0:4]), int(date[5:7]), int(date[8:10]))
     except TypeError:
         raise Exception('Please check input values (ex: the date)')
-
+    itr1 = 0
     filenames = glob.glob('%s/*.json' % targetpath)
     for filename in filenames:
         print filename
         items = file_read(filename)
+        itr2 = 0 
         for i, blog in enumerate(items):
             check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                             % (basedir, thirddir, directory_seq,\
@@ -132,7 +133,17 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                           date,
                           directory_seq,
                           basedir, debug=debug)
-
+            itr2 += 1
+        if itr2 == len(items):
+            print "%s items read completed successfully." % len(items)
+        else:
+            print "Not all items read."
+        itr1 += 1    
+    if len(filenames) == itr1:
+        print "%s files read completed successfully." % len(filenames)
+    else:
+        print "Not all files read."
+        
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Get input parameters.',
