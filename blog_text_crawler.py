@@ -2,7 +2,6 @@
 # -*-coding:utf-8-*-
 
 
-from datetime import datetime, timedelta
 import json
 import os
 import glob
@@ -10,12 +9,10 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from utils import checkdir
+from utils import checkdir, file_read, get_today
 
 
 URLBASE = 'http://m.blog.naver.com/%s/%s'
-
-get_today = lambda : datetime.now()
 
 def get_page(url):
     page = urllib2.urlopen(url)
@@ -23,7 +20,6 @@ def get_page(url):
     return (doc, doc.find("div", {"class": "_postView"}))
 
 def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
-                                     title, written_time, url, tags, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
     extract_category     = lambda doc: doc.find("a", {"class": "_categoryName"}).get_text().encode(encoding)
     extract_content_html = lambda doc: doc.find("div", {"id": "viewTypeSelector"})
@@ -97,11 +93,6 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
-def file_read(filename):
-   json_data = open(filename)
-   data = json.load(json_data)
-   return data
-
 def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="texts", debug=False):
     directory_seq = int(directory_seq)
     try:
@@ -168,4 +159,3 @@ if __name__ == '__main__':
         debug = False
 
     return_information(args.directory_seq, args.basedir, args.date, debug=debug)
-

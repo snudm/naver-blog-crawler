@@ -2,7 +2,6 @@
 # -*-coding:utf-8-*-
 
 
-from datetime import datetime, timedelta
 import json
 import os
 import glob
@@ -10,11 +9,10 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from utils import checkdir
+from utils import checkdir, file_read, get_today
+
 
 REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
-
-get_today = lambda : datetime.now()
 
 def get_reply(url):
     page = urllib2.urlopen(url)
@@ -86,11 +84,6 @@ def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, d
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
-def file_read(filename):
-   json_data = open(filename)
-   data = json.load(json_data)
-   return data
-
 def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="comments", debug=False):
     directory_seq = int(directory_seq)
     try:
@@ -120,7 +113,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
             print "%s items read completed successfully." % len(items)
         else:
             print "Not all items read."
-        itr1 += 1    
+        itr1 += 1
     if len(filenames) == itr1:
         print "%s files read completed successfully." % len(filenames)
     else:
@@ -149,4 +142,3 @@ if __name__ == '__main__':
         debug = False
 
     return_information(args.directory_seq, args.basedir, args.date, debug=debug)
-
