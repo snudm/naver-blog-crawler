@@ -115,7 +115,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
     for filename in filenames:
         print filename
         items = file_read(filename)
-        itr2 = 0 
+        itr2 = 0
         for i, blog in enumerate(items):
             check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                             % (basedir, thirddir, directory_seq,\
@@ -138,12 +138,14 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
             print "%s items read completed successfully." % len(items)
         else:
             print "Not all items read."
-        itr1 += 1    
+        itr1 += 1
     if len(filenames) == itr1:
         print "%s files read completed successfully." % len(filenames)
+        if len(filenames)==0:
+            print "You probably have to crawl lists first."
     else:
         print "Not all files read."
-        
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Get input parameters.',
