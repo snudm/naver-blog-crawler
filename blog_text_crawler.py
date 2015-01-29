@@ -20,6 +20,7 @@ def get_page(url):
     return (doc, doc.find("div", {"class": "_postView"}))
 
 def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
+                                    title, written_time, url, tags, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
     extract_category     = lambda doc: doc.find("a", {"class": "_categoryName"}).get_text().encode(encoding)
     extract_content_html = lambda doc: doc.find("div", {"id": "viewTypeSelector"})
