@@ -108,22 +108,25 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
         items = file_read(filename)
         itr2 = 0
         for i, blog in enumerate(items):
-            check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
-                            % (basedir, thirddir, directory_seq,\
-                               int(date[0:4]), int(date[5:7]), int(date[8:10]))
-            check_filename = '%s-%s.json' % (items[i]['blogId'], items[i]['logNo'])
-            if not os.path.isfile('%s/%s' % (check_targetpath, check_filename)):
-                web_crawl(items[i]['blogId'],
-                          items[i]['logNo'],
-                          items[i]['crawledTime'],
-                          items[i]['crawlerVersion'],
-                          items[i]['title'],
-                          items[i]['writtenTime'],
-                          items[i]['url'],
-                          items[i]['tags'],
-                          date,
-                          directory_seq,
-                          basedir, debug=debug)
+            try:
+                check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
+                                % (basedir, thirddir, directory_seq,\
+                                   int(date[0:4]), int(date[5:7]), int(date[8:10]))
+                check_filename = '%s-%s.json' % (items[i]['blogId'], items[i]['logNo'])
+                if not os.path.isfile('%s/%s' % (check_targetpath, check_filename)):
+                    web_crawl(items[i]['blogId'],
+                              items[i]['logNo'],
+                              items[i]['crawledTime'],
+                              items[i]['crawlerVersion'],
+                              items[i]['title'],
+                              items[i]['writtenTime'],
+                              items[i]['url'],
+                              items[i]['tags'],
+                              date,
+                              directory_seq,
+                              basedir, debug=debug)
+            except Exception as e:
+                print e
             itr2 += 1
         if itr2 == len(items):
             print "%s items read completed successfully." % len(items)
