@@ -15,3 +15,7 @@ def file_read(filename):
    json_data = open(filename)
    data = json.load(json_data)
    return data
+
+def get_version():
+    with open('version.cfg', 'r') as f:
+        return f.read().strip()

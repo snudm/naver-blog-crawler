@@ -9,6 +9,8 @@ import urllib2
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
+from utils import get_version
+
 
 URLBASE = 'http://section.blog.naver.com/sub/PostListByDirectory.nhn?'\
           'option.page.currentPage=%s&option.templateKind=0&option.directorySeq=%s&'\
@@ -193,8 +195,7 @@ if __name__ == '__main__':
         args.basedir = './data/lists'
 
     if not args.version:
-        with open('version.cfg', 'r') as f:
-            args.version = f.read().strip()
+        args.version = get_version()
 
     if args.type:
         if args.type=='all':

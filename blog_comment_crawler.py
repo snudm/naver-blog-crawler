@@ -9,7 +9,7 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from utils import checkdir, file_read, get_today
+from utils import checkdir, file_read, get_today, get_version
 
 
 REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
@@ -19,7 +19,7 @@ def get_reply(url):
     doc  = BeautifulSoup(page.read())
     return doc.find_all("li", {"class": "persc"})
 
-def make_structure(blog_id, log_no, written_time, replies, encoding='utf-8'):
+def make_structure(blog_id, log_no, written_time, replies, crawler_version, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
 
     def reply_json(reply):
@@ -50,9 +50,10 @@ def make_structure(blog_id, log_no, written_time, replies, encoding='utf-8'):
 
     return {u"blogId": blog_id,
             u"logNo": log_no,
+            u"crawlerVersion": crawler_version,
             u"writtenTime": written_time,
             u"comments": extract_reply(replies),
-            u"commentCrawledTime": extract_crawlerTime()}
+            u"crawledTime": extract_crawlerTime()}
 
 def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "comments"):
     PATH = '%s/%02d/%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
@@ -73,18 +74,19 @@ def error_log_url(blog_id, log_no, date, directory_seq, basedir, seconddir = "lo
     f.write(url)
     f.close()
 
-def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, debug=False):
+def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, crawler_version, debug=False):
     url = REPLY_URLBASE % (blog_id, log_no)
     if debug:
         print url
     reply_doc = get_reply(url)
     if reply_doc != None:
-        blog = make_structure(blog_id, log_no, written_time, reply_doc)
+        blog = make_structure(blog_id, log_no, written_time, reply_doc, crawler_version)
         make_json(blog, blog_id, log_no, date, directory_seq, basedir)
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
-def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="comments", debug=False):
+def return_information(directory_seq, basedir, date, crawler_version,\
+                       seconddir ="lists", thirddir="comments", debug=False):
     directory_seq = int(directory_seq)
     try:
         targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -107,7 +109,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                 comment_crawl(items[i]['blogId'],
                               items[i]['logNo'],
                               items[i]['writtenTime'],
-                              date, directory_seq, basedir, debug=debug)
+                              date, directory_seq, basedir, crawler_version, debug=debug)
             itr2 += 1
         if itr2 == len(items):
             print "%s items read completed successfully." % len(items)
@@ -129,6 +131,8 @@ if __name__ == '__main__':
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
+    parser.add_argument('-v', '--version', dest='version',
+                         help='assign crawler version')
     parser.add_argument('--debug', dest='debug', action='store_true',
                          help='enable debug mode')
     args = parser.parse_args()
@@ -136,9 +140,12 @@ if __name__ == '__main__':
     if not args.basedir:
         args.basedir = './data'
 
+    if not args.version:
+        args.version = get_version()
+
     if args.debug:
         debug = True
     else:
         debug = False
 
-    return_information(args.directory_seq, args.basedir, args.date, debug=debug)
+    return_information(args.directory_seq, args.basedir, args.date, args.version, debug=debug)

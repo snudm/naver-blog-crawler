@@ -9,7 +9,7 @@ import urllib2
 
 from bs4 import BeautifulSoup
 
-from utils import checkdir, file_read, get_today
+from utils import checkdir, file_read, get_today, get_version
 
 
 URLBASE = 'http://m.blog.naver.com/%s/%s'
@@ -94,7 +94,7 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
-def return_information(directory_seq, basedir, date, seconddir ="lists", thirddir="texts", debug=False):
+def return_information(directory_seq, basedir, date, crawler_version, seconddir ="lists", thirddir="texts", debug=False):
     directory_seq = int(directory_seq)
     try:
         targetpath = '%s/%s/%02d/%s/%02d/%02d'\
@@ -118,7 +118,7 @@ def return_information(directory_seq, basedir, date, seconddir ="lists", thirddi
                     web_crawl(items[i]['blogId'],
                               items[i]['logNo'],
                               items[i]['crawledTime'],
-                              items[i]['crawlerVersion'],
+                              crawler_version,
                               items[i]['title'],
                               items[i]['writtenTime'],
                               items[i]['url'],
@@ -151,15 +151,21 @@ if __name__ == '__main__':
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
+    parser.add_argument('-v', '--version', dest='version',
+                         help='assign crawler version')
     parser.add_argument('--debug', dest='debug', action='store_true',
                          help='enable debug mode')
     args = parser.parse_args()
 
     if not args.basedir:
         args.basedir = './data'
+
+    if not args.version:
+        args.version = get_version()
+
     if args.debug:
         debug = True
     else:
         debug = False
 
-    return_information(args.directory_seq, args.basedir, args.date, debug=debug)
+    return_information(args.directory_seq, args.basedir, args.date, args.version, debug=debug)
