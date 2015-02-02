@@ -8,6 +8,7 @@ import urllib2
 
 from datetime import datetime, timedelta
 
+from utils import checkdir, file_read, get_today, get_version
 
 def target_path(directory_seq, date, basedir,seconddir):
 
@@ -115,17 +116,18 @@ def statistics_blog(date, basedir):
 	write_json(static_blog, date, basedir)
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Get input parameters.',
-                        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-p', '--path', dest='basedir',
-                         help='assign data path')
-    parser.add_argument('-d', '--date', dest='date',
-                         help='assign date to crawl')
+    # import argparse
+    # parser = argparse.ArgumentParser(description='Get input parameters.',
+    #                     formatter_class=argparse.RawTextHelpFormatter)
+    # parser.add_argument('-p', '--path', dest='basedir',
+    #                      help='assign data path')
+    # parser.add_argument('-d', '--date', dest='date',
+    #                      help='assign date to crawl')
   
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    if not args.basedir:
-        args.basedir = './texts'
+    # if not args.basedir:
+    #     args.basedir = './texts'
 
-    statistics_blog(args.date, args.basedir)
+    # statistics_blog(args.date, args.basedir)
+    statistics_blog('2015-01-20', './')
