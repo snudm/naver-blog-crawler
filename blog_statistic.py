@@ -61,7 +61,7 @@ def original_count_blog_by_time(directory_seq, date, basedir, seconddir='lists')
 
 	time_cnt = {}
 	for d in range(0, 2):
-		tmp_date = datetime.strptime(date, '%Y-%m-%d') - timedelta(days=d)
+		tmp_date = datetime.strptime(date, '%Y-%m-%d') + timedelta(days=d)
 		tmp_date = tmp_date.isoformat()
 		
 		targetpath = target_path(directory_seq, tmp_date, basedir,seconddir)
@@ -87,7 +87,6 @@ def original_count_comment(directory_seq, date, basedir, seconddir='comments'):
 	for i, filename in enumerate(filenames):
 		items = file_read(filename)
 		cnt_comments = cnt_comments	+ len(items['comments'])
-		
 	return cnt_comments
 
 
