@@ -33,7 +33,7 @@ def make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time
 	   	   u"countListsBlog": cnt_lists_blog,
 	   	   u"successText": '{0:.02f}%'.format(percentage), 
 	   	   u"timeBlog": cnt_time_blog,
-	   	   u"countCommnet": cnt_comments}
+	   	   u"countComment": cnt_comments}
 	return cnt
 
 
