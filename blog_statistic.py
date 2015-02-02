@@ -61,7 +61,7 @@ def original_count_blog_by_time(directory_seq, date, basedir, seconddir='lists')
 
 	time_cnt = {}
 	for d in range(0, 2):
-		tmp_date = datetime.strptime(date, '%Y-%m-%d') - timedelta(days=d)
+		tmp_date = datetime.strptime(date, '%Y-%m-%d') + timedelta(days=d)
 		tmp_date = tmp_date.isoformat()
 		
 		targetpath = target_path(directory_seq, tmp_date, basedir,seconddir)
@@ -87,7 +87,6 @@ def original_count_comment(directory_seq, date, basedir, seconddir='comments'):
 	for i, filename in enumerate(filenames):
 		items = file_read(filename)
 		cnt_comments = cnt_comments	+ len(items['comments'])
-		
 	return cnt_comments
 
 
@@ -116,17 +115,18 @@ def statistics_blog(date, basedir):
 	write_json(static_blog, date, basedir)
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Get input parameters.',
-                        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-p', '--path', dest='basedir',
-                         help='assign data path')
-    parser.add_argument('-d', '--date', dest='date',
-                         help='assign date to crawl')
+    # import argparse
+    # parser = argparse.ArgumentParser(description='Get input parameters.',
+    #                     formatter_class=argparse.RawTextHelpFormatter)
+    # parser.add_argument('-p', '--path', dest='basedir',
+    #                      help='assign data path')
+    # parser.add_argument('-d', '--date', dest='date',
+    #                      help='assign date to crawl')
   
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    if not args.basedir:
-        args.basedir = './texts'
+    # if not args.basedir:
+    #     args.basedir = './texts'
 
-    statistics_blog(args.date, args.basedir)
+    # statistics_blog(args.date, args.basedir)
+    statistics_blog('2015-01-20', './')
