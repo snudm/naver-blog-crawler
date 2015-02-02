@@ -6,10 +6,7 @@ import os
 import glob
 import urllib2
 
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-
-from utils import checkdir, file_read, get_today, get_version
 
 
 def target_path(directory_seq, date, basedir,seconddir):
