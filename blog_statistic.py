@@ -7,16 +7,21 @@ import glob
 import urllib2
 
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 
 from utils import checkdir, file_read, get_today, get_version
 
 
 def target_path(directory_seq, date, basedir,seconddir):
-    return '%s/%s/%02d/%s/%02d/%02d' % (basedir, seconddir, directory_seq,\
-    									date[0:4], int(date[5:7]), int(date[8:10]))
+
+	date =  date[:10]
+	targetpath ='%s/%s/%02d/%s/%02d/%02d' % (basedir, seconddir, directory_seq,\
+												int(date[0:4]), int(date[5:7]), int(date[8:10]))
+	return targetpath
 
 
-def make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog):
+def make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog, cnt_comments):
+	
 	if cnt_lists_blog == 0:
 		percentage = 0
 	else: 
@@ -27,7 +32,8 @@ def make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time
 	   	   u"countImage": cnt_image, 
 	   	   u"countListsBlog": cnt_lists_blog,
 	   	   u"successText": '{0:.02f}%'.format(percentage), 
-	   	   u"timeBlog": cnt_time_blog}
+	   	   u"timeBlog": cnt_time_blog,
+	   	   u"countCommnet": cnt_comments}
 	return cnt
 
 
@@ -56,20 +62,36 @@ def original_count_blog_by_directory(directory_seq, date, basedir, seconddir='li
 def original_count_blog_by_time(directory_seq, date, basedir, seconddir='lists'):
 
 	time_cnt = {}
-	targetpath = target_path(directory_seq, date, basedir,seconddir)
-	filenames = glob.glob('%s/*.json' % targetpath)
-	for i, filename in enumerate(filenames):
-		items = file_read(filename)
-		for j, item in enumerate(items):
-			written_time = item['writtenTime']
-			if int(written_time[8:10]) == int(date[8:10]):
-				key = int(written_time[11:13])
-				if key in time_cnt.keys():
-					time_cnt[key] += 1 
-				else:
-					time_cnt[key] = 0
+	for d in range(0, 2):
+		tmp_date = datetime.strptime(date, '%Y-%m-%d') - timedelta(days=d)
+		tmp_date = tmp_date.isoformat()
+		
+		targetpath = target_path(directory_seq, tmp_date, basedir,seconddir)
+		filenames = glob.glob('%s/*.json' % targetpath)
+		for i, filename in enumerate(filenames):
+			items = file_read(filename)
+			for j, item in enumerate(items):
+				written_time = item['writtenTime']
+				if int(written_time[8:10]) == int(date[8:10]):
+					key = int(written_time[11:13])
+					if key in time_cnt.keys():
+						time_cnt[key] += 1 
+					else:
+						time_cnt[key] = 0
 	return [time_cnt]
 			
+
+def original_count_comment(directory_seq, date, basedir, seconddir='comments'):
+
+	targetpath = target_path(directory_seq, date, basedir,seconddir)
+	filenames = glob.glob('%s/*.json' % targetpath)
+	cnt_comments = 0
+	for i, filename in enumerate(filenames):
+		items = file_read(filename)
+		cnt_comments = cnt_comments	+ len(items['comments'])
+		
+	return cnt_comments
+
 
 def write_json(static_blog, date, basedir, seconddir='statistics'):
 	
@@ -90,7 +112,8 @@ def statistics_blog(date, basedir):
 		cnt_texts_blog, cnt_image = count_blog_by_directory(directory_seq, date, basedir)
 	  	cnt_lists_blog  = original_count_blog_by_directory(directory_seq, date, basedir)
 	  	cnt_time_blog   = original_count_blog_by_time(directory_seq, date, basedir)
-	  	jstr = make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog)
+	  	cnt_comments    = original_count_comment(directory_seq, date, basedir)
+	  	jstr = make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog, cnt_comments)
 	  	static_blog.append(jstr)
 	write_json(static_blog, date, basedir)
 
@@ -109,4 +132,3 @@ if __name__ == '__main__':
         args.basedir = './texts'
 
     statistics_blog(args.date, args.basedir)
-  
