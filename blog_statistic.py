@@ -83,7 +83,7 @@ def write_json(static_blog, date, basedir, seconddir='statistics'):
     f.close()
 
 
-def statistics_blog(date, basedir, seconddir):
+def statistics_blog(date, basedir):
 
 	static_blog = []
 	for directory_seq in range(5, 36):
@@ -108,5 +108,5 @@ if __name__ == '__main__':
     if not args.basedir:
         args.basedir = './texts'
 
-    count_blog_by_directory(args.date, args.basedir)
+    statistics_blog(args.date, args.basedir)
   
