@@ -31,7 +31,7 @@ def make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time
 	return cnt
 
 
-def count_blog_by_directory(directory_seq, date, basedir, seconddir='blogs'):
+def count_blog_by_directory(directory_seq, date, basedir, seconddir='texts'):
 	#basedir: /var/data/naver-blog/
 	targetpath = target_path(directory_seq, date, basedir,seconddir)
 	filenames = glob.glob('%s/*.json' % targetpath)
