@@ -6,6 +6,7 @@ import json
 import os
 import glob
 import urllib2
+import time
 
 from bs4 import BeautifulSoup
 
@@ -126,6 +127,7 @@ def return_information(directory_seq, basedir, date, crawler_version, seconddir 
                               date,
                               directory_seq,
                               basedir, debug=debug)
+                    time.sleep(0.1)
             except Exception as e:
                 print e
             itr2 += 1

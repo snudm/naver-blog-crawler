@@ -6,6 +6,7 @@ import json
 import os
 import glob
 import urllib2
+import time
 
 from bs4 import BeautifulSoup
 
@@ -82,6 +83,7 @@ def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, c
     if reply_doc != None:
         blog = make_structure(blog_id, log_no, written_time, reply_doc, crawler_version)
         make_json(blog, blog_id, log_no, date, directory_seq, basedir)
+        time.sleep(0.1)
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
