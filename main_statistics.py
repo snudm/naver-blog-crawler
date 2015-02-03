@@ -3,19 +3,27 @@
 import json
 import os
 import glob
+import csv
 
 from datetime import datetime, timedelta
 
-from blog_statistic import statistics_blog
+from utils import checkdir, file_read, get_today, get_version
 
 if __name__ == '__main__':
-	start_day = '2015-01-20'
-	end_day = '2015-02-02'
-	gap = (datetime.strptime(end_day, '%Y-%m-%d')\
-				- datetime.strptime(start_day, '%Y-%m-%d')).days
-
-	for day in range(0, gap+1):
-
-		tmp_date = datetime.strptime(start_day, '%Y-%m-%d') + timedelta(days=day)
-		tmp_date = tmp_date.isoformat()
-		statistics_blog(tmp_date, './')
+	
+	num_directory_seq = 31
+	basedir = '/home/web/public_html/data/naver-blog'
+	seconddir = 'statistics'
+	targetpath = '%s/%s' % (basedir, seconddir)
+	filenames = glob.glob('%s/*.json' % targetpath)
+	cnt_files = len(filenames)
+	table = [ [ 0 for i in range(cnt_files) ] for j in range(num_directory_seq + 2) ]
+	for i, filename in enumerate(filenames):
+		items = file_read(filename)
+		table[0][i] = filename.rsplit("statistics\\", 1)[1].rsplit(".", 1)[0]
+		for directory_seq in range(len(items)):
+			table[directory_seq+1][i] = items[directory_seq]['countTextsBlog']
+			table[num_directory_seq+1][i] = table[num_directory_seq+1][i] + table[directory_seq+1][i]
+	csvfile = open('test_file.csv', 'w')
+	wr = csv.writer(csvfile, dialect='excel')
+	[wr.writerow(r) for r in table]
