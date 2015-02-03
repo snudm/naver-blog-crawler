@@ -20,6 +20,7 @@ if __name__ == '__main__':
 	table = [ [ 0 for i in range(cnt_files) ] for j in range(num_directory_seq + 2) ]
 	for i, filename in enumerate(filenames):
 		items = file_read(filename)
+		print filename
 		table[0][i] = filename.rsplit("statistics\\", 1)[1].rsplit(".", 1)[0]
 		for directory_seq in range(len(items)):
 			table[directory_seq+1][i] = items[directory_seq]['countTextsBlog']
