@@ -124,3 +124,4 @@ if __name__ == '__main__':
 		tmp_date = datetime.strptime(start_day, '%Y-%m-%d') + timedelta(days=day)
 		tmp_date = tmp_date.isoformat()
 		statistics_blog(tmp_date[:10], './')
+
