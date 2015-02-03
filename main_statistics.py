@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	for i, filename in enumerate(filenames):
 		items = file_read(filename)
 		print filename
-		table[0][i] = filename.rsplit("statistics\\", 1)[1].rsplit(".", 1)[0]
+		table[0][i] = filename.rsplit("statistics/", 1)[1].rsplit(".", 1)[0]
 		for directory_seq in range(len(items)):
 			table[directory_seq+1][i] = items[directory_seq]['countTextsBlog']
 			table[num_directory_seq+1][i] = table[num_directory_seq+1][i] + table[directory_seq+1][i]
