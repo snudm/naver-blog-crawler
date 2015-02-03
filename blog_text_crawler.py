@@ -127,7 +127,7 @@ def return_information(directory_seq, basedir, date, crawler_version, seconddir 
                               date,
                               directory_seq,
                               basedir, debug=debug)
-                    time.sleep(0.1)
+                    time.sleep(0.5)
             except Exception as e:
                 print e
             itr2 += 1
