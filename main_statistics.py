@@ -25,6 +25,7 @@ if __name__ == '__main__':
 		for directory_seq in range(len(items)):
 			table[directory_seq+1][i] = items[directory_seq]['countTextsBlog']
 			table[num_directory_seq+1][i] = table[num_directory_seq+1][i] + table[directory_seq+1][i]
-	csvfile = open('test_file.csv', 'w')
+	savefilename = '/home/web/public_html/data/naver-blog/test_file.csv'
+	csvfile = open(savefilename, 'w')
 	wr = csv.writer(csvfile, dialect='excel')
 	[wr.writerow(r) for r in table]
