@@ -12,7 +12,6 @@ from utils import checkdir, file_read, get_today, get_version
 
 def target_path(directory_seq, date, basedir,seconddir):
 
-	date =  date[:10]
 	targetpath ='%s/%s/%02d/%s/%02d/%02d' % (basedir, seconddir, directory_seq,\
 												int(date[0:4]), int(date[5:7]), int(date[8:10]))
 	return targetpath
@@ -115,17 +114,13 @@ def statistics_blog(date, basedir):
 	write_json(static_blog, date, basedir)
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Get input parameters.',
-                        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-p', '--path', dest='basedir',
-                         help='assign data path')
-    parser.add_argument('-d', '--date', dest='date',
-                         help='assign date to crawl')
-  
-    args = parser.parse_args()
+	start_day = '2015-01-20'
+	end_day = '2015-02-02'
+	gap = (datetime.strptime(end_day, '%Y-%m-%d')\
+				- datetime.strptime(start_day, '%Y-%m-%d')).days
 
-    if not args.basedir:
-        args.basedir = './texts'
+	for day in range(0, gap+1):
 
-    statistics_blog(args.date, args.basedir)
+		tmp_date = datetime.strptime(start_day, '%Y-%m-%d') + timedelta(days=day)
+		tmp_date = tmp_date.isoformat()
+		statistics_blog(tmp_date[:10], './')
