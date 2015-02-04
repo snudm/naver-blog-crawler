@@ -18,7 +18,7 @@ URLBASE = 'http://m.blog.naver.com/%s/%s'
 def get_page(url):
     try:
         page = urllib2.urlopen(url, timeout=3)
-    execept Exception as e:
+    except Exception as e:
         print e, url
     doc  = BeautifulSoup(page.read())
     return (doc, doc.find("div", {"class": "_postView"}))
@@ -99,6 +99,8 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
 def return_information(directory_seq, basedir, date, crawler_version, seconddir ="lists", thirddir="texts", debug=False):
+    if debug:
+        print "Start blog text crawling..."
     directory_seq = int(directory_seq)
     try:
         targetpath = '%s/%s/%02d/%s/%02d/%02d'\
