@@ -117,11 +117,11 @@ if __name__ == '__main__':
 	start_day = '2015-01-20'
 	import argparse
 
-    parser = argparse.ArgumentParser(description='Get input parameters.',
-                        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-d', '--date', dest='date',
-                         help='assign end date to crawl')
-    args = parser.parse_args()
+	parser = argparse.ArgumentParser(description='Get input parameters.',\
+							formatter_class=argparse.RawTextHelpFormatter)
+	parser.add_argument('-d', '--date', dest='date',
+							help='assign end date to crawl')
+	args = parser.parse_args()
 
 	gap = (datetime.strptime(args.date, '%Y-%m-%d')\
 				- datetime.strptime(start_day, '%Y-%m-%d')).days
