@@ -16,7 +16,10 @@ from utils import checkdir, file_read, get_today, get_version
 URLBASE = 'http://m.blog.naver.com/%s/%s'
 
 def get_page(url):
-    page = urllib2.urlopen(url)
+    try:
+        page = urllib2.urlopen(url, timeout=3)
+    execept Exception as e:
+        print e, url
     doc  = BeautifulSoup(page.read())
     return (doc, doc.find("div", {"class": "_postView"}))
 
