@@ -62,7 +62,7 @@ def make_json(blog, blog_id, log_no, date, directory_seq, basedir, seconddir = "
     PATH = '%s/%02d/%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
     targetpath = '%s/%s/%02d/%s' % (basedir, seconddir, directory_seq, PATH)
     checkdir(targetpath)
-    filename = '%s/%s-%s.json' % (targetpath, blog_id, log_no)
+    filename = '%s/%s.json' % (targetpath, log_no)
     f        = open(filename, 'w')
     jsonstr  = json.dumps(blog, sort_keys=True, indent=4, encoding='utf-8')
     f.write(jsonstr)
@@ -119,7 +119,7 @@ def return_information(directory_seq, basedir, date, crawler_version, seconddir 
                 check_targetpath = '%s/%s/%02d/%s/%02d/%02d'\
                                 % (basedir, thirddir, directory_seq,\
                                    int(date[0:4]), int(date[5:7]), int(date[8:10]))
-                check_filename = '%s-%s.json' % (items[i]['blogId'], items[i]['logNo'])
+                check_filename = '%s-%s.json' % (items[i]['logNo'])
                 if not os.path.isfile('%s/%s' % (check_targetpath, check_filename)):
                     web_crawl(items[i]['blogId'],
                               items[i]['logNo'],
