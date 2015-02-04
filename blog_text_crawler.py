@@ -89,8 +89,6 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
                         written_time, url, tags, date, directory_seq, basedir, debug=False):
     url = URLBASE % (blog_id, log_no)
     (raw, doc) = get_page(url)
-    if debug:
-        print url
     if doc != None:
         blog = make_structure(blog_id, log_no, raw, doc, crawled_time,
                         crawler_version, title, written_time, url, tags)

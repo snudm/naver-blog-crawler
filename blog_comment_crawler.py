@@ -16,7 +16,11 @@ from utils import checkdir, file_read, get_today, get_version
 REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
 
 def get_reply(url):
-    page = urllib2.urlopen(url)
+    try:
+        page = urllib2.urlopen(url, timeout=3)
+    except Exception as e:
+        print e, url
+        time.sleep(10)
     doc  = BeautifulSoup(page.read())
     return doc.find_all("li", {"class": "persc"})
 
@@ -83,7 +87,6 @@ def comment_crawl(blog_id, log_no, written_time, date, directory_seq, basedir, c
     if reply_doc != None:
         blog = make_structure(blog_id, log_no, written_time, reply_doc, crawler_version)
         make_json(blog, blog_id, log_no, date, directory_seq, basedir)
-        time.sleep(0.1)
     else:
         error_log_url(blog_id, log_no, date, directory_seq, basedir)
 
