@@ -20,6 +20,7 @@ def get_page(url):
         page = urllib2.urlopen(url, timeout=3)
     except Exception as e:
         print e, url
+        time.sleep(100)
     doc  = BeautifulSoup(page.read())
     return (doc, doc.find("div", {"class": "_postView"}))
 
@@ -133,7 +134,6 @@ def return_information(directory_seq, basedir, date, crawler_version, seconddir 
                               date,
                               directory_seq,
                               basedir, debug=debug)
-                    time.sleep(1)
             except Exception as e:
                 print e
             itr2 += 1
