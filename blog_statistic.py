@@ -115,11 +115,18 @@ def statistics_blog(date, basedir):
 
 if __name__ == '__main__':
 	start_day = '2015-01-20'
-	end_day = '2015-02-02'
-	gap = (datetime.strptime(end_day, '%Y-%m-%d')\
+	import argparse
+
+    parser = argparse.ArgumentParser(description='Get input parameters.',
+                        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-d', '--date', dest='date',
+                         help='assign end date to crawl')
+    args = parser.parse_args()
+
+	gap = (datetime.strptime(args.date, '%Y-%m-%d')\
 				- datetime.strptime(start_day, '%Y-%m-%d')).days
 
-	for day in range(0, gap+1):
+	for day in range(0, gap+2):
 
 		tmp_date = datetime.strptime(start_day, '%Y-%m-%d') + timedelta(days=day)
 		tmp_date = tmp_date.isoformat()
