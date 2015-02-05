@@ -17,7 +17,7 @@ REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
 
 def get_reply(url):
     try:
-        page = urllib2.urlopen(url, timeout=3)
+        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url, timeout=3)
     except Exception as e:
         print e, url
         time.sleep(100)
