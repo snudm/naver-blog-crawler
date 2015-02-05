@@ -20,7 +20,7 @@ def get_reply(url):
         page = urllib2.urlopen(url, timeout=3)
     except Exception as e:
         print e, url
-        time.sleep(10)
+        time.sleep(100)
     doc  = BeautifulSoup(page.read())
     return doc.find_all("li", {"class": "persc"})
 
