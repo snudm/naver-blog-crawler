@@ -117,7 +117,7 @@ def return_information(directory_seq, basedir, date, crawler_version,\
                               items[i]['logNo'],
                               items[i]['writtenTime'],
                               date, directory_seq, basedir, crawler_version, debug=debug)
-                time.sleep(0.5)
+                time.sleep(0.1)
             itr2 += 1
         if itr2 == len(items):
             print "%s items read completed successfully." % len(items)
