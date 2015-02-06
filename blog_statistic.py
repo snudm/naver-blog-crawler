@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
 	for day in range(0, gap+1):
 
-		tmp_date = datetime.strptime(startdate, '%Y-%m-%d') + timedelta(days=day)
+		tmp_date = datetime.strptime(args.startdate, '%Y-%m-%d') + timedelta(days=day)
 		tmp_date = tmp_date.isoformat()
 		statistics_blog(tmp_date[:10], args.basedir)
 		print tmp_date
