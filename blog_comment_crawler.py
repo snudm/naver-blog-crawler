@@ -133,9 +133,9 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-c', '--category', required=True, dest='directory_seq',
-                         help='assign target category to crawl')
-    parser.add_argument('-p', '--path', dest='basedir',
+    # parser.add_argument('-c', '--category', required=True, dest='directory_seq',
+    #                      help='assign target category to crawl')
+    # parser.add_argument('-p', '--path', dest='basedir',
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
@@ -156,4 +156,7 @@ if __name__ == '__main__':
     else:
         debug = False
 
-    return_information(args.directory_seq, args.basedir, args.date, args.version, debug=debug)
+    # return_information(args.directory_seq, args.basedir, args.date, args.version, debug=debug)
+
+    for direc in range(5, 36):
+        return_information(direc, args.basedir, args.date, args.version, debug=debug)
