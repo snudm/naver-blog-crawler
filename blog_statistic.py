@@ -123,6 +123,8 @@ if __name__ == '__main__':
 							help='assign end date to crawl')
 	parser.add_argument('-ed', '--enddate', dest='enddate',
 							help='assign end date to crawl')
+	parser.add_argument('-p', '--path', dest='basedir',
+							help='assign data path')
 	args = parser.parse_args()
 
 	gap = (datetime.strptime(args.enddate, '%Y-%m-%d')\
@@ -132,5 +134,5 @@ if __name__ == '__main__':
 
 		tmp_date = datetime.strptime(startdate, '%Y-%m-%d') + timedelta(days=day)
 		tmp_date = tmp_date.isoformat()
-		statistics_blog(tmp_date[:10], '/home/web/public_html/data/naver-blog')
+		statistics_blog(tmp_date[:10], args.basedir)
 		print tmp_date
