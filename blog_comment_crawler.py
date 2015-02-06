@@ -18,11 +18,13 @@ REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
 def get_reply(url):
     try:
         page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url, timeout=3)
+        doc  = BeautifulSoup(page.read())
+        return doc.find_all("li", {"class": "persc"})
     except Exception as e:
         print e, url
         time.sleep(100)
-    doc  = BeautifulSoup(page.read())
-    return doc.find_all("li", {"class": "persc"})
+        return None
+  
 
 def make_structure(blog_id, log_no, written_time, replies, crawler_version, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
