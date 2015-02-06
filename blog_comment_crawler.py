@@ -135,7 +135,7 @@ if __name__ == '__main__':
                         formatter_class=argparse.RawTextHelpFormatter)
     # parser.add_argument('-c', '--category', required=True, dest='directory_seq',
     #                      help='assign target category to crawl')
-    # parser.add_argument('-p', '--path', dest='basedir',
+    parser.add_argument('-p', '--path', dest='basedir',
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
                          help='assign date to crawl')
