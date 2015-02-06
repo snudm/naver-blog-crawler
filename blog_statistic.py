@@ -89,8 +89,9 @@ def original_count_comment(directory_seq, date, basedir, seconddir='comments'):
 	return cnt_comments
 
 
-def write_json(static_blog, date, basedir, seconddir='statistics'):
-	
+def write_json(static_blog, date, seconddir='statistics'):
+
+	basedir ='/home/web/public_html/data/naver-blog'
     PATH = '%s-%02d-%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
     targetpath = '%s/%s' % (basedir, seconddir)
     checkdir(targetpath)
@@ -111,7 +112,7 @@ def statistics_blog(date, basedir):
 	  	cnt_comments    = original_count_comment(directory_seq, date, basedir)
 	  	jstr = make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog, cnt_comments)
 	  	static_blog.append(jstr)
-	write_json(static_blog, date, basedir)
+	write_json(static_blog, date)
 
 if __name__ == '__main__':
 	
