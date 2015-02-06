@@ -93,13 +93,13 @@ def write_json(static_blog, date, seconddir='statistics'):
 
 	basedir ='/home/web/public_html/data/naver-blog'
 	PATH = '%s-%02d-%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
-    targetpath = '%s/%s' % (basedir, seconddir)
-    checkdir(targetpath)
-    filename = '%s/%s.json' % (targetpath, PATH)
-    f        = open(filename, 'w')
-    jsonstr  = json.dumps(static_blog, sort_keys=True, indent=4, encoding='utf-8')
-    f.write(jsonstr)
-    f.close()
+	targetpath = '%s/%s' % (basedir, seconddir)
+	checkdir(targetpath)
+	filename = '%s/%s.json' % (targetpath, PATH)
+	f        = open(filename, 'w')
+	jsonstr  = json.dumps(static_blog, sort_keys=True, indent=4, encoding='utf-8')
+	f.write(jsonstr)
+	f.close()
 
 
 def statistics_blog(date, basedir):
