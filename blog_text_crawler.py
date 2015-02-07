@@ -25,7 +25,7 @@ def get_page(url):
     return (doc, doc.find("div", {"class": "_postView"}))
 
 def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
-                                    title, written_time, url, tags, encoding='utf-8'):
+                                    title, written_time, url, tags, directory_seq, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
     extract_category     = lambda doc: doc.find("a", {"class": "_categoryName"}).get_text().encode(encoding)
     extract_content_html = lambda doc: doc.find("div", {"id": "viewTypeSelector"})
@@ -50,6 +50,7 @@ def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
             u"content": extract_content_html(doc).get_text().encode(encoding),
             u"crawledTime": crawled_time,
             u"crawlerVersion": crawler_version,
+            u"directorySeq": directory_seq,
             u"title": title,
             u"writtenTime": written_time,
             u"url": url,
@@ -91,7 +92,7 @@ def web_crawl(blog_id, log_no, crawled_time, crawler_version, title,
     (raw, doc) = get_page(url)
     if doc != None:
         blog = make_structure(blog_id, log_no, raw, doc, crawled_time,
-                        crawler_version, title, written_time, url, tags)
+                        crawler_version, title, written_time, url, tags, directory_seq)
         count_images(blog, directory_seq, basedir)
         make_json(blog, blog_id, log_no, date, directory_seq, basedir)
     else:
