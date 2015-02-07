@@ -18,11 +18,12 @@ URLBASE = 'http://m.blog.naver.com/%s/%s'
 def get_page(url):
     try:
         page = urllib2.urlopen(url, timeout=3)
+        doc  = BeautifulSoup(page.read())
+        return (doc, doc.find("div", {"class": "_postView"}))
     except Exception as e:
         print e, url
         time.sleep(100)
-    doc  = BeautifulSoup(page.read())
-    return (doc, doc.find("div", {"class": "_postView"}))
+        return None
 
 def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
                                     title, written_time, url, tags, directory_seq, encoding='utf-8'):

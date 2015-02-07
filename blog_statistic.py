@@ -89,16 +89,17 @@ def original_count_comment(directory_seq, date, basedir, seconddir='comments'):
 	return cnt_comments
 
 
-def write_json(static_blog, date, basedir, seconddir='statistics'):
-	
-    PATH = '%s-%02d-%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
-    targetpath = '%s/%s' % (basedir, seconddir)
-    checkdir(targetpath)
-    filename = '%s/%s.json' % (targetpath, PATH)
-    f        = open(filename, 'w')
-    jsonstr  = json.dumps(static_blog, sort_keys=True, indent=4, encoding='utf-8')
-    f.write(jsonstr)
-    f.close()
+def write_json(static_blog, date, seconddir='statistics'):
+
+	basedir ='/home/web/public_html/data/naver-blog'
+	PATH = '%s-%02d-%02d' % (int(date[0:4]), int(date[5:7]), int(date[8:10]))
+	targetpath = '%s/%s' % (basedir, seconddir)
+	checkdir(targetpath)
+	filename = '%s/%s.json' % (targetpath, PATH)
+	f        = open(filename, 'w')
+	jsonstr  = json.dumps(static_blog, sort_keys=True, indent=4, encoding='utf-8')
+	f.write(jsonstr)
+	f.close()
 
 
 def statistics_blog(date, basedir):
@@ -111,7 +112,7 @@ def statistics_blog(date, basedir):
 	  	cnt_comments    = original_count_comment(directory_seq, date, basedir)
 	  	jstr = make_json(directory_seq, cnt_texts_blog, cnt_image, cnt_lists_blog, cnt_time_blog, cnt_comments)
 	  	static_blog.append(jstr)
-	write_json(static_blog, date, basedir)
+	write_json(static_blog, date)
 
 if __name__ == '__main__':
 	
@@ -123,6 +124,8 @@ if __name__ == '__main__':
 							help='assign end date to crawl')
 	parser.add_argument('-ed', '--enddate', dest='enddate',
 							help='assign end date to crawl')
+	parser.add_argument('-p', '--path', dest='basedir',
+							help='assign data path')
 	args = parser.parse_args()
 
 	gap = (datetime.strptime(args.enddate, '%Y-%m-%d')\
@@ -130,7 +133,7 @@ if __name__ == '__main__':
 
 	for day in range(0, gap+1):
 
-		tmp_date = datetime.strptime(startdate, '%Y-%m-%d') + timedelta(days=day)
+		tmp_date = datetime.strptime(args.startdate, '%Y-%m-%d') + timedelta(days=day)
 		tmp_date = tmp_date.isoformat()
-		statistics_blog(tmp_date[:10], '/home/web/public_html/data/naver-blog')
+		statistics_blog(tmp_date[:10], args.basedir)
 		print tmp_date

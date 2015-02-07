@@ -17,12 +17,14 @@ REPLY_URLBASE = 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s'
 
 def get_reply(url):
     try:
-        page = urllib2.urlopen(url, timeout=3)
+        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url, timeout=3)
+        doc  = BeautifulSoup(page.read())
+        return doc.find_all("li", {"class": "persc"})
     except Exception as e:
         print e, url
-        time.sleep(10)
-    doc  = BeautifulSoup(page.read())
-    return doc.find_all("li", {"class": "persc"})
+        time.sleep(100)
+        return None
+  
 
 def make_structure(blog_id, log_no, written_time, replies, crawler_version, encoding='utf-8'):
     extract_crawlerTime  = lambda: get_today().strftime("%Y-%m-%d %H:%M")
@@ -115,6 +117,7 @@ def return_information(directory_seq, basedir, date, crawler_version,\
                               items[i]['logNo'],
                               items[i]['writtenTime'],
                               date, directory_seq, basedir, crawler_version, debug=debug)
+                time.sleep(0.1)
             itr2 += 1
         if itr2 == len(items):
             print "%s items read completed successfully." % len(items)
@@ -131,7 +134,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Get input parameters.',
                         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--category', required=True, dest='directory_seq',
-                         help='assign target category to crawl')
+                          help='assign target category to crawl')
     parser.add_argument('-p', '--path', dest='basedir',
                          help='assign data path')
     parser.add_argument('-d', '--date', dest='date',
