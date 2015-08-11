@@ -34,6 +34,8 @@ def make_structure(item, crawler_version, encoding='utf-8'):
 
     extract_blog_id = lambda d: d.find("input", {"class": "vBlogId"})['value']
     extract_date    = lambda d: sanitize(d.find("span", {"class": "date"})).replace(".", "-")
+    if extract_date.count('-') > 2:
+        extract_date    = '%s %s' % (extract_date[:10], extract_date[-5:])
     extract_log_no  = lambda d: d.find("input", {"class": "vLogNo"})['value']
     extract_text    = lambda d: sanitize(d.find("div", {"class":"list_content"}))
     extract_title   = lambda d: sanitize(d.find("a"))
