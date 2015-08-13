@@ -12,6 +12,7 @@ get_today_str = lambda: get_today().strftime('%Y-%m-%d %H:%M')
 def checkdir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
+        print('Created %s' % directory)
 
 
 def file_read(filename):
@@ -25,12 +26,12 @@ def get_version():
         return f.read().strip()
 
 
-def parse_datetime(string):
-    return datetime.strptime(string, '%Y.%m.%d. %H:%M')
+def parse_datetime(string, form='%Y.%m.%d. %H:%M'):
+    return datetime.strptime(string, form)
 
 
-def format_datetime(dt):
-    return dt.strftime('%Y-%m-%d %H:%M')
+def format_datetime(dt, form='%Y-%m-%d %H:%M'):
+    return dt.strftime(form)
 
 
 def write_json(data, filename):
