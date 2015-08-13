@@ -44,9 +44,12 @@ def get_keys_for_item(item):
         log_no = parse_qs(parts.query)['logNo'][0]
         return (blog_id, log_no)
     else:
-        proxy = html.parse(proxy).xpath('//frame/@src')[0]
-        parts = urlparse(proxy)
-        return tuple(parts.path.split('/')[1:])
+        try:
+            proxy = html.parse(proxy).xpath('//frame/@src')[0]
+            parts = urlparse(proxy)
+            return tuple(parts.path.split('/')[1:])
+        except IOError:
+            return tuple(proxy, None)
 
 
 def get_time_for_item(item):
