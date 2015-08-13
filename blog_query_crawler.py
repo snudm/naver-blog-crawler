@@ -81,7 +81,7 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         return None
 
 
-def crawl_blog_posts_for_query(query, sdate, edate, datadir='./tmp'):
+def crawl_blog_posts_for_query(query, sdate, edate, datadir):
     print(query)
     date = sdate
     while date != edate:
@@ -108,12 +108,12 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir='./tmp'):
 
 
 if __name__=='__main__':
-    encoding = 'utf-8'
+    datadir = './tmp'
     sdate, edate = '2015-08-01', '2015-08-03'   # change me
 
     with open('queries.txt') as f:
-        queries = f.read().decode(encoding).split('\n')
+        queries = f.read().decode('utf-8').split('\n')
 
     for query in queries:
         query = query.split()[0]
-        crawl_blog_posts_for_query(query, sdate, edate)
+        crawl_blog_posts_for_query(query, sdate, edate, datadir)
