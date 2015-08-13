@@ -111,9 +111,6 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir):
                 try:
                     info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
                     utils.write_json(info, '%s/%s.json' % (subdir, log_no))
-                    else:
-                        print 'Omit post (%s, %s)' % (blog_id, log_no)
-
                 except (IOError, TypeError), e:
                     print 'Uncrawlable post (%s, %s): %s' % (blog_id, log_no, e)
                 time.sleep(0.1)
