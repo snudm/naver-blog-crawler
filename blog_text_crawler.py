@@ -49,7 +49,6 @@ def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
 
     return {u"blogId": blog_id,
             u"logNo": log_no,
-            u"contentHtml": ' '.join(extract_content_html(doc).contents),
             u"content": extract_content_html(doc).get_text().encode(encoding),
             u"crawledTime": crawled_time,
             u"crawlerVersion": crawler_version,

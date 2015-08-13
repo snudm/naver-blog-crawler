@@ -85,7 +85,6 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         post = btc.make_structure(blog_id, log_no, raw, doc, crawled_time,
                 crawler_version, title, written_time, url, post_tags, directory_seq)
         if not verbose:
-            del post['contentHtml']
             del post['directorySeq']
             del post['sympathyCount']
         return post
