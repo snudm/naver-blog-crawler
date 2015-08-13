@@ -49,7 +49,7 @@ def get_keys_for_item(item):
             parts = urlparse(proxy)
             return tuple(parts.path.split('/')[1:])
         except IOError:
-            return tuple(proxy, None)
+            return tuple([proxy, None])
 
 
 def get_time_for_item(item):
