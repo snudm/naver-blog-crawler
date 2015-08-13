@@ -95,7 +95,7 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         return None
 
 
-def crawl_blog_posts_for_query(query, sdate, edate, datadir, removes=None):
+def crawl_blog_posts_for_query(query, sdate, edate, datadir):
     date = sdate
     while date != edate:
         subdir = '/'.join([datadir, query, date.split('-')[0]]); utils.checkdir(subdir)
@@ -110,8 +110,7 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir, removes=None):
             for (blog_id, log_no), written_time in keys.items():
                 try:
                     info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                    if all(r not in info['content'].decode(ENCODING) for r in removes):
-                        utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+                    utils.write_json(info, '%s/%s.json' % (subdir, log_no))
                     else:
                         print 'Omit post (%s, %s)' % (blog_id, log_no)
 
@@ -133,6 +132,5 @@ if __name__=='__main__':
 
     for line in queries:
         query = line.split()[0]
-        removes = [r.strip('-') for r in line.split()[1:]]
-        print query, removes
-        crawl_blog_posts_for_query(query, sdate, edate, datadir, removes)
+        print query
+        crawl_blog_posts_for_query(query, sdate, edate, datadir)
