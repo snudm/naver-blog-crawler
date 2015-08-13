@@ -13,6 +13,8 @@ import blog_text_crawler as btc
 import utils
 
 
+ENCODING = 'utf-8'
+
 listurl = 'http://section.blog.naver.com/sub/SearchBlog.nhn?type=post&option.keyword=%s&term=&option.startDate=%s&option.endDate=%s&option.page.currentPage=%s&option.orderBy=date'
 tagsurl = 'http://section.blog.naver.com/TagSearchAsync.nhn?variables=[%s]'
 posturl = 'http://blog.naver.com/%s/%s'
@@ -99,7 +101,7 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir, removes=None):
             for (blog_id, log_no), written_time in keys.items():
                 try:
                     info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                    if all(remove not in info['content'] for remove in removes):
+                    if all(r not in info['content'].decode(ENCODING) for r in removes):
                         utils.write_json(info, '%s/%s.json' % (subdir, log_no))
                 except (IOError, TypeError), e:
                     print 'Uncrawlable post (%s, %s): %s' % (blog_id, log_no, e)
@@ -115,10 +117,10 @@ if __name__=='__main__':
     sdate, edate = '2015-08-01', '2015-08-03'   # change me
 
     with open('queries.txt') as f:
-        queries = f.read().decode('utf-8').split('\n')
+        queries = f.read().decode(ENCODING).split('\n')
 
-    for query in queries:
-        query = query.split()[0]
-        removes = [r.strip('-') for r in query.split()[1:]]
+    for line in queries:
+        query = line.split()[0]
+        removes = [r.strip('-') for r in line.split()[1:]]
         print query, removes
         crawl_blog_posts_for_query(query, sdate, edate, datadir, removes)
