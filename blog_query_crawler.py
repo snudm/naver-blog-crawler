@@ -84,8 +84,7 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         return None
 
 
-def crawl_blog_posts_for_query(query, sdate, edate, datadir):
-    print(query)
+def crawl_blog_posts_for_query(query, sdate, edate, datadir, removes=None):
     date = sdate
     while date != edate:
         subdir = '/'.join([datadir, query, date.split('-')[0]]); utils.checkdir(subdir)
@@ -100,7 +99,8 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir):
             for (blog_id, log_no), written_time in keys.items():
                 try:
                     info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                    utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+                    if all(remove not in info['content'] for remove in removes):
+                        utils.write_json(info, '%s/%s.json' % (subdir, log_no))
                 except (IOError, TypeError), e:
                     print 'Uncrawlable post (%s, %s): %s' % (blog_id, log_no, e)
                 time.sleep(0.1)
@@ -119,4 +119,6 @@ if __name__=='__main__':
 
     for query in queries:
         query = query.split()[0]
-        crawl_blog_posts_for_query(query, sdate, edate, datadir)
+        removes = [r.strip('-') for r in query.split()[1:]]
+        print query, removes
+        crawl_blog_posts_for_query(query, sdate, edate, datadir, removes)
