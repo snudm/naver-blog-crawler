@@ -126,7 +126,7 @@ if __name__=='__main__':
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
     with open('queries.txt') as f:
-        queries = f.read().decode(ENCODING).split('\n')
+        queries = f.read().decode(ENCODING).split('\n')[:-1]
 
     for line in queries:
         query = line.split()[0]
