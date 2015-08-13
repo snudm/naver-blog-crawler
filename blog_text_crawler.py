@@ -32,7 +32,7 @@ def make_structure(blog_id, log_no, raw, doc, crawled_time, crawler_version,
     extract_crawlerTime  = get_today_str()
     extract_category     = lambda doc: doc.find("a", {"class": "_categoryName"}).get_text().encode(encoding)
 
-    def extract_content_html(doc)
+    def extract_content_html(doc):
         try:
             return doc.find("div", {"id": "viewTypeSelector"})
         except RuntimeError, e:
