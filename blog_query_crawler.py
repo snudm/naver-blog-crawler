@@ -50,7 +50,7 @@ def get_keys_for_item(item):
             proxy = html.parse(proxy).xpath('//frame/@src')[0]
             parts = urlparse(proxy)
             return tuple(parts.path.split('/')[1:])
-        except IOError:
+        except (IOError, IndexError):
             return tuple([proxy, None])
 
 
