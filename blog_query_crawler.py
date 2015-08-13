@@ -119,8 +119,8 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir, removes=None):
 
 
 if __name__=='__main__':
-    datadir = './tmp'
-    sdate, edate = '2015-08-01', '2015-08-03'   # change me
+    datadir = './tmp'                           # change me
+    sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
     with open('queries.txt') as f:
         queries = f.read().decode(ENCODING).split('\n')
