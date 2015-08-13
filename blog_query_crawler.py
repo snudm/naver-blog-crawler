@@ -23,8 +23,11 @@ mobileurl = 'http://m.blog.naver.com/%s/%s'
 
 def get_nitems_for_query(query, date):
     root = html.parse(listurl % (query, date, date, 1))
-    nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
-    return int(nitems.strip(u'건'))
+    try:
+        nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
+        return int(nitems.strip(u'건'))
+    except IndexError:
+        return 0
 
 
 def get_items_from_page(query, date, pagenum):
