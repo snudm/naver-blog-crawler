@@ -94,7 +94,7 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         return None
 
 
-def crawl_blog_posts_for_query(query, sdate, edate, datadir):
+def crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep=0.1):
     date = sdate
     while date != edate:
         subdir = '/'.join([datadir, query, date.split('-')[0]]); utils.checkdir(subdir)
@@ -112,7 +112,7 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir):
                     utils.write_json(info, '%s/%s.json' % (subdir, log_no))
                 except (IOError, TypeError), e:
                     print 'Uncrawlable post (%s, %s): %s' % (blog_id, log_no, e)
-                time.sleep(0.1)
+                time.sleep(sleep)
 
         date = utils.parse_datetime(date, form='%Y-%m-%d') + timedelta(1)
         date = utils.format_datetime(date, form='%Y-%m-%d')
@@ -122,6 +122,7 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir):
 if __name__=='__main__':
     datadir = './tmp'                           # change me
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
+    sleep = 0.3                                 # 0.1 is too short
 
     with open('queries.txt') as f:
         queries = f.read().decode(ENCODING).split('\n')[:-1]
@@ -129,4 +130,4 @@ if __name__=='__main__':
     for line in queries:
         query = line.split()[0]
         print query
-        crawl_blog_posts_for_query(query, sdate, edate, datadir)
+        crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep)
