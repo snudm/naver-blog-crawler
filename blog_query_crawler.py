@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 from datetime import timedelta
 import sys
+import time
 from urlparse import urlparse, parse_qs
 
 if 'threading' in sys.modules:
@@ -69,32 +70,34 @@ def get_time_for_item(item):
 
 def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
 
-    def get_page_html(url):
-        resp = requests.get(url, headers={'referer': 'http://search.naver.com'})
-        root = html.fromstring(resp.text)
-        elem = root.xpath('//div[@class="_postView"]')[0]
-        html_ = etree.tostring(elem)
-        return (None, BeautifulSoup(html_))
-
     def get_title(root):
         try:
             return root.xpath('//h3[@class="tit_h3"]/text()')[0].strip()
         except IndexError:
             return None
 
-    url = mobileurl % (blog_id, log_no)
-    root = html.parse(url)
+    def get_page_html(url):
+        try:
+            resp = requests.get(url, headers={'referer': 'http://search.naver.com'})
+            root = html.fromstring(resp.text)
+            elem = root.xpath('//div[@class="_postView"]')[0]
+            html_ = etree.tostring(elem)
+            return (BeautifulSoup(html_), get_title(root))
+        except IOError:
+            print('Sleep for 10 minutes...')
+            time.sleep(600)
 
-    (raw, doc)      = get_page_html(url)
+    url = mobileurl % (blog_id, log_no)
+
+    (doc, title)    = get_page_html(url)
     crawled_time    = utils.get_today_str()
     crawler_version = utils.get_version()
-    title           = get_title(root)
     url             = posturl % (blog_id, log_no)
     post_tags       = tags[(blog_id, log_no)]
     directory_seq   = None  # NOTE: No directory sequence given for query crawler
 
     if doc:
-        post = btc.make_structure(blog_id, log_no, raw, doc, crawled_time,
+        post = btc.make_structure(blog_id, log_no, None, doc, crawled_time,
                 crawler_version, title, written_time, url, post_tags, directory_seq)
         if not verbose:
             del post['directorySeq']
