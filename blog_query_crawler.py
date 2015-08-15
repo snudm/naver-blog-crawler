@@ -3,11 +3,14 @@
 
 from __future__ import unicode_literals
 from datetime import timedelta
+import sys
 from urlparse import urlparse, parse_qs
 
-from bs4 import BeautifulSoup
+if 'threading' in sys.modules:
+    raise Exception('threading module loaded before patching!')
 from gevent import monkey; monkey.patch_all()
 from gevent.pool import Pool
+from bs4 import BeautifulSoup
 from lxml import etree, html
 import requests
 
@@ -125,8 +128,12 @@ def crawl_blog_posts_for_query_per_date(*args):
         keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
         tags = get_tags_for_items(keys)
         for (blog_id, log_no), written_time in keys.items():
-            info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-            utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+            try:
+                info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
+                utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+            except IndexError:
+                print Exception(\
+                        'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
     print query, date, nitems
 
@@ -141,7 +148,7 @@ if __name__=='__main__':
     DATADIR = './tmp'                           # change me
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
-    queries = '현대차 현대자동차'.split()
+    queries = '현대자동차 A6'.split()
     dates = get_dates(sdate, edate)
     qdset = [[q, d] for q in queries for d in dates]
 
