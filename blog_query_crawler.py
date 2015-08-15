@@ -125,25 +125,28 @@ def get_dates(sdate, edate):
 
 
 def crawl_blog_posts_for_query_per_date(*args):
-    query, date = args[0]
+    try:
+        query, date = args[0]
 
-    subdir = '/'.join([DATADIR, query, date.split('-')[0]])
-    utils.checkdir(subdir)
+        subdir = '/'.join([DATADIR, query, date.split('-')[0]])
+        utils.checkdir(subdir)
 
-    nitems = get_nitems_for_query(query, date, date)
-    for pagenum in range(int(nitems/10.)):
-        items = get_items_from_page(query, date, pagenum + 1)
-        keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
-        tags = get_tags_for_items(keys)
-        for (blog_id, log_no), written_time in keys.items():
-            try:
-                info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                utils.write_json(info, '%s/%s.json' % (subdir, log_no))
-            except IndexError:
-                print Exception(\
-                        'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
+        nitems = get_nitems_for_query(query, date, date)
+        for pagenum in range(int(nitems/10.)):
+            items = get_items_from_page(query, date, pagenum + 1)
+            keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
+            tags = get_tags_for_items(keys)
+            for (blog_id, log_no), written_time in keys.items():
+                try:
+                    info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
+                    utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+                except IndexError:
+                    print Exception(\
+                            'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
-    print query, date, nitems
+        print query, date, nitems
+    except Exception as e:
+        print query, date, 'FAILED:', e
 
 
 def print_expected_counts(queries):
