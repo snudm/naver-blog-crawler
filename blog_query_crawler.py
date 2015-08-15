@@ -101,25 +101,31 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
         return None
 
 
-def crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep=0.1):
-    date = sdate
-    while date != edate:
-        subdir = '/'.join([datadir, query, date.split('-')[0]]); utils.checkdir(subdir)
+def get_dates(sdate, edate):
+    sdt = utils.parse_datetime(sdate, form='%Y-%m-%d')
+    edt = utils.parse_datetime(edate, form='%Y-%m-%d')
 
-        print date,
-        nitems = get_nitems_for_query(query, date, date)
-        for pagenum in range(int(nitems/10.)):
-            items = get_items_from_page(query, date, pagenum + 1)
-            keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
-            tags = get_tags_for_items(keys)
+    delta = edt - sdt
 
-            for (blog_id, log_no), written_time in keys.items():
-                info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+    return [utils.format_datetime(sdt + timedelta(days=i), form='%Y-%m-%d')\
+            for i in range(delta.days + 1)]
 
-        date = utils.parse_datetime(date, form='%Y-%m-%d') + timedelta(1)
-        date = utils.format_datetime(date, form='%Y-%m-%d')
-        print nitems
+
+def crawl_blog_posts_for_query_per_date(query, date, datadir):
+    print query, date,
+    subdir = '/'.join([datadir, query, date.split('-')[0]])
+    utils.checkdir(subdir)
+
+    nitems = get_nitems_for_query(query, date, date)
+    for pagenum in range(int(nitems/10.)):
+        items = get_items_from_page(query, date, pagenum + 1)
+        keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
+        tags = get_tags_for_items(keys)
+        for (blog_id, log_no), written_time in keys.items():
+            info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
+            utils.write_json(info, '%s/%s.json' % (subdir, log_no))
+
+    print nitems
 
 
 def print_expected_counts(queries):
@@ -131,13 +137,14 @@ def print_expected_counts(queries):
 if __name__=='__main__':
     datadir = './tmp'                           # change me
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
-    sleep = 0.3                                 # 0.1 is too short
 
-    with open('queries.txt') as f:
-        queries = f.read().decode(ENCODING).split('\n')[:-1]
+    queries = '현대차 현대자동차'.split()
+    dates = get_dates(sdate, edate)
 
-    #print_expected_counts(queries)
-    for line in queries:
-        query = line.split()[0]
-        print query
-        crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep)
+    print('Get expected document counts')
+    print_expected_counts(queries)
+
+    print('Start crawling:')
+    for query in queries:
+        for date in dates:
+            crawl_blog_posts_for_query_per_date(query, date, datadir)
