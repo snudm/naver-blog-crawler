@@ -21,8 +21,8 @@ posturl = 'http://blog.naver.com/%s/%s'
 mobileurl = 'http://m.blog.naver.com/%s/%s'
 
 
-def get_nitems_for_query(query, date):
-    root = html.parse(listurl % (query, date, date, 1))
+def get_nitems_for_query(query, sdate, edate):
+    root = html.parse(listurl % (query, sdate, edate, 1))
     try:
         nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
         return int(nitems.strip(u'건'))
@@ -100,7 +100,7 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep=0.1):
         subdir = '/'.join([datadir, query, date.split('-')[0]]); utils.checkdir(subdir)
 
         print date,
-        nitems = get_nitems_for_query(query, date)
+        nitems = get_nitems_for_query(query, date, date)
         for pagenum in range(int(nitems/10.)):
             items = get_items_from_page(query, date, pagenum + 1)
             keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
@@ -127,6 +127,12 @@ if __name__=='__main__':
     with open('queries.txt') as f:
         queries = f.read().decode(ENCODING).split('\n')[:-1]
 
+    # print counts
+    for line in queries:
+        query = line.split()[0]
+        print query, get_nitems_for_query(query, sdate, edate)
+
+    # craw blog posts
     for line in queries:
         query = line.split()[0]
         print query
