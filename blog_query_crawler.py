@@ -84,8 +84,13 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
             html_ = etree.tostring(elem)
             return (BeautifulSoup(html_), get_title(root))
         except IOError:
-            print('Sleep for 10 minutes...')
-            time.sleep(600)
+            while 1:
+                try:
+                    requests.get(url)
+                    break
+                except:
+                print('Sleep for 10 minutes...')
+                time.sleep(600)
 
     url = mobileurl % (blog_id, log_no)
 
