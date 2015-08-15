@@ -6,8 +6,10 @@ from datetime import timedelta
 from urlparse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup
-import requests
+from gevent import monkey; monkey.patch_all()
+from gevent.pool import Pool
 from lxml import etree, html
+import requests
 
 import blog_text_crawler as btc
 import utils
@@ -111,9 +113,10 @@ def get_dates(sdate, edate):
             for i in range(delta.days + 1)]
 
 
-def crawl_blog_posts_for_query_per_date(query, date, datadir):
-    print query, date,
-    subdir = '/'.join([datadir, query, date.split('-')[0]])
+def crawl_blog_posts_for_query_per_date(*args):
+    query, date = args[0]
+
+    subdir = '/'.join([DATADIR, query, date.split('-')[0]])
     utils.checkdir(subdir)
 
     nitems = get_nitems_for_query(query, date, date)
@@ -125,7 +128,7 @@ def crawl_blog_posts_for_query_per_date(query, date, datadir):
             info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
             utils.write_json(info, '%s/%s.json' % (subdir, log_no))
 
-    print nitems
+    print query, date, nitems
 
 
 def print_expected_counts(queries):
@@ -135,16 +138,16 @@ def print_expected_counts(queries):
 
 
 if __name__=='__main__':
-    datadir = './tmp'                           # change me
+    DATADIR = './tmp'                           # change me
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
     queries = '현대차 현대자동차'.split()
     dates = get_dates(sdate, edate)
+    qdset = [[q, d] for q in queries for d in dates]
 
     print('Get expected document counts')
     print_expected_counts(queries)
 
     print('Start crawling:')
-    for query in queries:
-        for date in dates:
-            crawl_blog_posts_for_query_per_date(query, date, datadir)
+    pool = Pool(20)
+    pool.map(crawl_blog_posts_for_query_per_date, qdset)
