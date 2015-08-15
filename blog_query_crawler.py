@@ -16,6 +16,7 @@ from lxml import etree, html
 import requests
 
 import blog_text_crawler as btc
+from settings import DATADIR
 import utils
 
 
@@ -153,7 +154,6 @@ def print_expected_counts(queries):
 
 
 if __name__=='__main__':
-    DATADIR = './tmp'                           # change me
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
     with open('queries.txt', 'r') as f:
