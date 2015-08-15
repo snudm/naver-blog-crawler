@@ -149,7 +149,7 @@ if __name__=='__main__':
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
     with open('queries.txt', 'r') as f:
-        queries = [line.split()[0] for line in f.read().split('\n')[:-1]]
+        queries = [line.split()[0] for line in f.read().decode(ENCODING).split('\n')[:-1]]
     dates = get_dates(sdate, edate)
     qdset = [[q, d] for q in queries for d in dates]
 
