@@ -4,13 +4,13 @@
 from __future__ import unicode_literals
 from datetime import timedelta
 import sys
-import time
 from urlparse import urlparse, parse_qs
 
 if 'threading' in sys.modules:
     raise Exception('threading module loaded before patching!')
 from gevent import monkey; monkey.patch_all()
 from gevent.pool import Pool
+import gevent
 from bs4 import BeautifulSoup
 from lxml import etree, html
 import requests
@@ -34,7 +34,7 @@ def html_parse(url):
             return html.parse(url)
         except IOError:
             print('Sleep for 10 minutes...')
-            time.sleep(600)
+            gevent.sleep(600)
 
 
 def requests_get(url):
@@ -43,7 +43,7 @@ def requests_get(url):
             return requests.get(url)
         except:
             print('Sleep for 10 minutes...')
-            time.sleep(600)
+            gevent.sleep(600)
 
 
 def get_nitems_for_query(query, sdate, edate):
