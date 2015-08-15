@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 from datetime import timedelta
-import time
 from urlparse import urlparse, parse_qs
 
+from bs4 import BeautifulSoup
 import requests
-from lxml import html
+from lxml import etree, html
 
 import blog_text_crawler as btc
 import utils
@@ -64,6 +64,13 @@ def get_time_for_item(item):
 
 def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
 
+    def get_page_html(url):
+        resp = requests.get(url, headers={'referer': 'http://search.naver.com'})
+        root = html.fromstring(resp.text)
+        elem = root.xpath('//div[@class="_postView"]')[0]
+        html_ = etree.tostring(elem)
+        return (None, BeautifulSoup(html_))
+
     def get_title(root):
         try:
             return root.xpath('//h3[@class="tit_h3"]/text()')[0].strip()
@@ -73,7 +80,7 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
     url = mobileurl % (blog_id, log_no)
     root = html.parse(url)
 
-    (raw, doc)      = btc.get_page(url)
+    (raw, doc)      = get_page_html(url)
     crawled_time    = utils.get_today_str()
     crawler_version = utils.get_version()
     title           = get_title(root)
@@ -107,16 +114,18 @@ def crawl_blog_posts_for_query(query, sdate, edate, datadir, sleep=0.1):
             tags = get_tags_for_items(keys)
 
             for (blog_id, log_no), written_time in keys.items():
-                try:
-                    info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                    utils.write_json(info, '%s/%s.json' % (subdir, log_no))
-                except (IOError, TypeError), e:
-                    print 'Uncrawlable post (%s, %s): %s' % (blog_id, log_no, e)
-                time.sleep(sleep)
+                info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
+                utils.write_json(info, '%s/%s.json' % (subdir, log_no))
 
         date = utils.parse_datetime(date, form='%Y-%m-%d') + timedelta(1)
         date = utils.format_datetime(date, form='%Y-%m-%d')
         print nitems
+
+
+def print_expected_counts(queries):
+    for line in queries:
+        query = line.split()[0]
+        print query, get_nitems_for_query(query, sdate, edate)
 
 
 if __name__=='__main__':
@@ -127,12 +136,7 @@ if __name__=='__main__':
     with open('queries.txt') as f:
         queries = f.read().decode(ENCODING).split('\n')[:-1]
 
-    # print counts
-    for line in queries:
-        query = line.split()[0]
-        print query, get_nitems_for_query(query, sdate, edate)
-
-    # craw blog posts
+    #print_expected_counts(queries)
     for line in queries:
         query = line.split()[0]
         print query
