@@ -142,13 +142,14 @@ def crawl_blog_posts_for_query_per_date(*args):
                     utils.write_json(info, '%s/%s.json' % (subdir, log_no))
                 except IndexError:
                     print Exception(\
-                            'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
+                        'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
         print query, date, nitems
     except Exception as e:
         print query, date, 'FAILED:', e
         print('Sleep for 10 minutes...')
         gevent.sleep(600)
+        crawl_blog_posts_for_query_per_date([query, date])
 
 
 def print_expected_counts(queries):
@@ -164,9 +165,6 @@ if __name__=='__main__':
         queries = [line.split()[0] for line in f.read().decode(ENCODING).split('\n')[:-1]]
     dates = get_dates(sdate, edate)
     qdset = [[q, d] for q in queries for d in dates]
-
-    print('Get expected document counts')
-    print_expected_counts(queries)
 
     print('Start crawling:')
     pool = Pool(20)
