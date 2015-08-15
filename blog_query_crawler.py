@@ -48,11 +48,8 @@ def requests_get(url):
 
 def get_nitems_for_query(query, sdate, edate):
     root = html_parse(listurl % (query, sdate, edate, 1))
-    try:
-        nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
-        return int(nitems.strip(u'건'))
-    except IndexError:
-        return 0
+    nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
+    return int(nitems.strip(u'건'))
 
 
 def get_items_from_page(query, date, pagenum):
@@ -74,12 +71,9 @@ def get_keys_for_item(item):
         log_no = parse_qs(parts.query)['logNo'][0]
         return (blog_id, log_no)
     else:
-        try:
-            proxy = html_parse(proxy).xpath('//frame/@src')[0]
-            parts = urlparse(proxy)
-            return tuple(parts.path.split('/')[1:])
-        except IndexError:
-            return tuple([proxy, None])
+        proxy = html_parse(proxy).xpath('//frame/@src')[0]
+        parts = urlparse(proxy)
+        return tuple(parts.path.split('/')[1:])
 
 
 def get_time_for_item(item):
@@ -90,10 +84,7 @@ def get_time_for_item(item):
 def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
 
     def get_title(root):
-        try:
-            return root.xpath('//h3[@class="tit_h3"]/text()')[0].strip()
-        except IndexError:
-            return None
+        return root.xpath('//h3[@class="tit_h3"]/text()')[0].strip()
 
     def get_page_html(url):
         root = html.parse(url)
