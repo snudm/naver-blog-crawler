@@ -28,8 +28,26 @@ posturl = 'http://blog.naver.com/%s/%s'
 mobileurl = 'http://m.blog.naver.com/%s/%s'
 
 
+def html_parse(url):
+    while 1:
+        try:
+            return html.parse(url)
+        except IOError:
+            print('Sleep for 10 minutes...')
+            time.sleep(600)
+
+
+def requests_get(url):
+    while 1:
+        try:
+            return requests.get(url)
+        except:
+            print('Sleep for 10 minutes...')
+            time.sleep(600)
+
+
 def get_nitems_for_query(query, sdate, edate):
-    root = html.parse(listurl % (query, sdate, edate, 1))
+    root = html_parse(listurl % (query, sdate, edate, 1))
     try:
         nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
         return int(nitems.strip(u'건'))
@@ -38,13 +56,13 @@ def get_nitems_for_query(query, sdate, edate):
 
 
 def get_items_from_page(query, date, pagenum):
-    root = html.parse(listurl % (query, date, date, pagenum))
+    root = html_parse(listurl % (query, date, date, pagenum))
     return root.xpath('//ul[@class="list_type_1 search_list"]/li')
 
 
 def get_tags_for_items(item_keys):
     join_str = ','.join("{\"blogId\":\"%s\",\"logNo\":\"%s\"}" % (b, l) for b, l in item_keys)
-    response = requests.get(tagsurl % join_str).json()
+    response = requests_get(tagsurl % join_str).json()
     return {(item['blogId'], unicode(item['logNo'])): item['tags'] for item in response}
 
 
@@ -57,10 +75,10 @@ def get_keys_for_item(item):
         return (blog_id, log_no)
     else:
         try:
-            proxy = html.parse(proxy).xpath('//frame/@src')[0]
+            proxy = html_parse(proxy).xpath('//frame/@src')[0]
             parts = urlparse(proxy)
             return tuple(parts.path.split('/')[1:])
-        except (IOError, IndexError):
+        except IndexError:
             return tuple([proxy, None])
 
 
@@ -78,20 +96,10 @@ def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
             return None
 
     def get_page_html(url):
-        try:
-            resp = requests.get(url, headers={'referer': 'http://search.naver.com'})
-            root = html.fromstring(resp.text)
-            elem = root.xpath('//div[@class="_postView"]')[0]
-            html_ = etree.tostring(elem)
-            return (BeautifulSoup(html_), get_title(root))
-        except IOError:
-            while 1:
-                try:
-                    requests.get(url)
-                    break
-                except:
-                    print('Sleep for 10 minutes...')
-                    time.sleep(600)
+        root = html.parse(url)
+        elem = root.xpath('//div[@class="_postView"]')[0]
+        html_ = etree.tostring(elem)
+        return (BeautifulSoup(html_), get_title(root))
 
     url = mobileurl % (blog_id, log_no)
 
