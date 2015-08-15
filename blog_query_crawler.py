@@ -147,6 +147,8 @@ def crawl_blog_posts_for_query_per_date(*args):
         print query, date, nitems
     except Exception as e:
         print query, date, 'FAILED:', e
+        print('Sleep for 10 minutes...')
+        gevent.sleep(600)
 
 
 def print_expected_counts(queries):
