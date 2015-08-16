@@ -29,6 +29,7 @@ def html_parse(url):
         return html.parse(url)
     except IOError:
         print('IOError for %s' % url)
+        return None
 
 
 def requests_get(url):
@@ -67,9 +68,13 @@ def get_keys_for_item(item):
         log_no = parse_qs(parts.query)['logNo'][0]
         return (blog_id, log_no)
     else:
-        proxy = html_parse(proxy).xpath('//frame/@src')[0]
-        parts = urlparse(proxy)
-        return tuple(parts.path.split('/')[1:])
+        url = html_parse(proxy)
+        if url:
+            url = url.xpath('//frame/@src')[0]
+            parts = urlparse(url)
+            return tuple(parts.path.split('/')[1:])
+        else:
+            return tuple([proxy, None])
 
 
 def get_time_for_item(item):
