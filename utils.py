@@ -15,6 +15,16 @@ def checkdir(directory):
         print('Created %s' % directory)
 
 
+def rcheckdir(sftp, remotedir):
+    try:
+        sftp.chdir(remotedir)
+    except IOError:
+        dirname, basename = os.path.split(remotedir.rstrip('/'))
+        rcheckdir(sftp, dirname)
+        sftp.mkdir(basename)
+        sftp.chdir(basename)
+
+
 def file_read(filename):
    json_data = open(filename)
    data = json.load(json_data)

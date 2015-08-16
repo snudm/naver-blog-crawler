@@ -3,24 +3,20 @@
 
 from __future__ import unicode_literals
 from datetime import timedelta
+import os
 import sys
+import time
 from urlparse import urlparse, parse_qs
 
-if 'threading' in sys.modules:
-    raise Exception('threading module loaded before patching!')
-from gevent import monkey; monkey.patch_all()
-from gevent.pool import Pool
-import gevent
 from bs4 import BeautifulSoup
 from lxml import etree, html
+import paramiko
 import requests
 
 import blog_text_crawler as btc
-from settings import DATADIR
+from settings import DATADIR, ENCODING, REMOTE
 import utils
 
-
-ENCODING = 'utf-8'
 
 listurl = 'http://section.blog.naver.com/sub/SearchBlog.nhn?type=post&option.keyword=%s&term=&option.startDate=%s&option.endDate=%s&option.page.currentPage=%s&option.orderBy=date'
 tagsurl = 'http://section.blog.naver.com/TagSearchAsync.nhn?variables=[%s]'
@@ -34,7 +30,7 @@ def html_parse(url):
             return html.parse(url)
         except IOError:
             print('Sleep for 10 minutes...')
-            gevent.sleep(600)
+            time.sleep(600)
 
 
 def requests_get(url):
@@ -43,7 +39,7 @@ def requests_get(url):
             return requests.get(url)
         except:
             print('Sleep for 10 minutes...')
-            gevent.sleep(600)
+            time.sleep(600)
 
 
 def get_nitems_for_query(query, sdate, edate):
@@ -125,47 +121,59 @@ def get_dates(sdate, edate):
 
 
 def crawl_blog_posts_for_query_per_date(*args):
+    query, date = args[0]
+
+    # make directories
+    subdir = '/'.join([DATADIR, query, date.split('-')[0]])
+    utils.checkdir(subdir)
+    if REMOTE:
+        rsubdir = '/'.join([REMOTE['dir'], query, date.split('-')[0]])
+        utils.rcheckdir(sftp, rsubdir)
+
+    # check number of items
     try:
-        query, date = args[0]
-
-        subdir = '/'.join([DATADIR, query, date.split('-')[0]])
-        utils.checkdir(subdir)
-
         nitems = get_nitems_for_query(query, date, date)
-        for pagenum in range(int(nitems/10.)):
-            items = get_items_from_page(query, date, pagenum + 1)
-            keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
-            tags = get_tags_for_items(keys)
-            for (blog_id, log_no), written_time in keys.items():
-                try:
-                    info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
-                    utils.write_json(info, '%s/%s.json' % (subdir, log_no))
-                except IndexError:
-                    print Exception(\
-                        'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
+    except IndexError:
+        print query, date, 'None'
+        return
 
-        print query, date, nitems
-    except Exception as e:
-        print query, date, 'FAILED:', e
-        print('Sleep for 10 minutes...')
-        gevent.sleep(600)
-        crawl_blog_posts_for_query_per_date([query, date])
+    # crawl items
+    for pagenum in range(int(nitems/10.)):
+        items = get_items_from_page(query, date, pagenum + 1)
+        keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
+        tags = get_tags_for_items(keys)
+        for (blog_id, log_no), written_time in keys.items():
+            try:
+                info = crawl_blog_post(blog_id, log_no, tags, written_time, verbose=False)
+                localpath = '%s/%s.json' % (subdir, log_no)
+                utils.write_json(info, localpath)
+                if REMOTE:
+                    remotepath = '%s/%s.json' % (rsubdir, log_no)
+                    sftp.put(localpath, remotepath)
+            except IndexError:
+                print Exception(\
+                    'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
-
-def print_expected_counts(queries):
-    for line in queries:
-        query = line.split()[0]
-        print query, get_nitems_for_query(query, sdate, edate)
+    print query, date, nitems
 
 
 if __name__=='__main__':
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
 
+    if REMOTE:
+        ssh = paramiko.SSHClient()
+        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
+        sftp = ssh.open_sftp()
+
     with open('queries.txt', 'r') as f:
         queries = [line.split()[0] for line in f.read().decode(ENCODING).split('\n')[:-1]]
-    dates = get_dates(sdate, edate)
-    qdset = [[q, d] for q in queries for d in dates]
+        dates = get_dates(sdate, edate)
+        qdset = [[q, d] for q in queries for d in dates]
 
-    print('Start crawling:')
-    pool = Pool(20)
-    pool.map(crawl_blog_posts_for_query_per_date, qdset)
+    for qd in qdset:
+        crawl_blog_posts_for_query_per_date(qd)
+
+    if REMOTE:
+        sftp.close()
+        ssh.close()
