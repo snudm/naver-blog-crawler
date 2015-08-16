@@ -25,12 +25,10 @@ mobileurl = 'http://m.blog.naver.com/%s/%s'
 
 
 def html_parse(url):
-    while 1:
-        try:
-            return html.parse(url)
-        except IOError:
-            print('Sleep for 10 minutes: %s' % url)
-            time.sleep(600)
+    try:
+        return html.parse(url)
+    except IOError:
+        print('IOError for %s' % url)
 
 
 def requests_get(url):
@@ -38,14 +36,16 @@ def requests_get(url):
         try:
             return requests.get(url)
         except:
-            print('Sleep for 10 minutes: %s' % url)
-            time.sleep(600)
+            print('Error for %s' % url)
 
 
 def get_nitems_for_query(query, sdate, edate):
-    root = html_parse(listurl % (query, sdate, edate, 1))
-    nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
-    return int(nitems.strip(u'건'))
+    try:
+        root = html_parse(listurl % (query, sdate, edate, 1))
+        nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
+        return int(nitems.strip(u'건'))
+    except:
+        return 0
 
 
 def get_items_from_page(query, date, pagenum):
