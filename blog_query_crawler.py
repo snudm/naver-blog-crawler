@@ -154,11 +154,14 @@ def crawl_blog_posts_for_query_per_date(*args):
                 print Exception(\
                     'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
+            time.sleep(sleep)
+
     print query, date, nitems
 
 
 if __name__=='__main__':
     sdate, edate = '2010-01-01', '2015-08-01'   # change me
+    sleep = 0.2
 
     if REMOTE:
         ssh = paramiko.SSHClient()
