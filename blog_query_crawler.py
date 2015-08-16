@@ -162,7 +162,11 @@ if __name__=='__main__':
 
     if REMOTE:
         ssh = paramiko.SSHClient()
-        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        except:
+            pass
         ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
         sftp = ssh.open_sftp()
 
