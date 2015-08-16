@@ -24,34 +24,23 @@ posturl = 'http://blog.naver.com/%s/%s'
 mobileurl = 'http://m.blog.naver.com/%s/%s'
 
 
-def html_parse(url):
-    try:
-        return html.parse(url)
-    except IOError:
-        print('IOError for %s' % url)
-        return None
-
-
 def requests_get(url):
     while 1:
         try:
             return requests.get(url)
         except:
-            print('Error for %s' % url)
+            print('Pass error for %s' % url)
+            return None
 
 
 def get_nitems_for_query(query, sdate, edate):
     try:
-        root = html_parse(listurl % (query, sdate, edate, 1))
+        root = html.parse(listurl % (query, sdate, edate, 1))
         nitems = root.xpath('//p[@class="several_post"]/em/text()')[0]
         return int(nitems.strip(u'건'))
-    except:
+    except IOError:
+        print('Pass IOError: (%s, %s)' % (query, sdate))
         return 0
-
-
-def get_items_from_page(query, date, pagenum):
-    root = html_parse(listurl % (query, date, date, pagenum))
-    return root.xpath('//ul[@class="list_type_1 search_list"]/li')
 
 
 def get_tags_for_items(item_keys):
@@ -60,49 +49,35 @@ def get_tags_for_items(item_keys):
     return {(item['blogId'], unicode(item['logNo'])): item['tags'] for item in response}
 
 
-def get_keys_for_item(item):
-    proxy = item.xpath('./h5/a/@href')[0]
-    parts = urlparse(proxy)
-    if parts.netloc=='blog.naver.com':
-        blog_id = parts.path.strip('/')
-        log_no = parse_qs(parts.query)['logNo'][0]
-        return (blog_id, log_no)
-    else:
-        url = html_parse(proxy)
-        if url:
-            url = url.xpath('//frame/@src')[0]
-            parts = urlparse(url)
-            return tuple(parts.path.split('/')[1:])
-        else:
-            return tuple([proxy, None])
-
-
-def get_time_for_item(item):
-    time = item.xpath('./div[@class="list_data"]/span[@class="date"]/text()')[0]
-    return utils.format_datetime(utils.parse_datetime(time))
-
-
 def crawl_blog_post(blog_id, log_no, tags, written_time=None, verbose=True):
 
     def get_title(root):
         return root.xpath('//h3[@class="tit_h3"]/text()')[0].strip()
 
     def get_page_html(url):
-        root = html.parse(url)
-        elem = root.xpath('//div[@class="_postView"]')[0]
-        html_ = etree.tostring(elem)
-        return (BeautifulSoup(html_), get_title(root))
+        try:
+            root = html.parse(url)
+            elem = root.xpath('//div[@class="_postView"]')[0]
+            html_ = etree.tostring(elem)
+            return (BeautifulSoup(html_), get_title(root))
+        except IOError:
+            print ''
+            return (None, None)
 
-    url = mobileurl % (blog_id, log_no)
+    if blog_id.startswith('http'):
+        url = blog_id
+    else:
+        url = mobileurl % (blog_id, log_no)
 
     (doc, title)    = get_page_html(url)
-    crawled_time    = utils.get_today_str()
-    crawler_version = utils.get_version()
-    url             = posturl % (blog_id, log_no)
-    post_tags       = tags[(blog_id, log_no)]
-    directory_seq   = None  # NOTE: No directory sequence given for query crawler
 
     if doc:
+        crawled_time    = utils.get_today_str()
+        crawler_version = utils.get_version()
+        url             = posturl % (blog_id, log_no)
+        post_tags       = tags[(blog_id, log_no)]
+        directory_seq   = None  # NOTE: No directory sequence given for query crawler
+
         post = btc.make_structure(blog_id, log_no, None, doc, crawled_time,
                 crawler_version, title, written_time, url, post_tags, directory_seq)
         if not verbose:
@@ -127,6 +102,18 @@ def get_dates(sdate, edate):
 
 def crawl_blog_posts_for_query_per_date(query, date):
 
+    def get_keys_from_page(query, date, pagenum):
+        root = html.parse(listurl % (query, date, date, pagenum))
+        items = root.xpath('//ul[@class="list_type_1 search_list"]')[0]
+
+        blog_ids = items.xpath('./input[@name="blogId"]/@value')
+        log_nos = items.xpath('./input[@name="logNo"]/@value')
+        times = [utils.format_datetime(utils.parse_datetime(time))\
+            for time in items.xpath('./li/div[@class="list_data"]/span[@class="date"]/text()')]
+
+        return {(b, l): t for b, l, t in zip(blog_ids, log_nos, times)}
+
+
     # make directories
     subdir = '/'.join([DATADIR, query, date.split('-')[0]])
     utils.checkdir(subdir)
@@ -143,8 +130,7 @@ def crawl_blog_posts_for_query_per_date(query, date):
 
     # crawl items
     for pagenum in range(int(nitems/10.)):
-        items = get_items_from_page(query, date, pagenum + 1)
-        keys = {get_keys_for_item(item): get_time_for_item(item) for item in items}
+        keys = get_keys_from_page(query, date, pagenum + 1)
         tags = get_tags_for_items(keys)
         for (blog_id, log_no), written_time in keys.items():
             try:
@@ -187,9 +173,9 @@ def open_ssh():
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
     except:
         pass
-    ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
     sftp = ssh.open_sftp()
     return ssh, sftp
 
