@@ -14,7 +14,7 @@ import paramiko
 import requests
 
 import blog_text_crawler as btc
-from settings import DATADIR, ENCODING, REMOTE
+from settings import DATADIR, ENCODING, REMOTE, SLEEP, QUERIES
 import utils
 
 
@@ -29,7 +29,7 @@ def html_parse(url):
         try:
             return html.parse(url)
         except IOError:
-            print('Sleep for 10 minutes...')
+            print('Sleep for 10 minutes: %s' % url)
             time.sleep(600)
 
 
@@ -38,7 +38,7 @@ def requests_get(url):
         try:
             return requests.get(url)
         except:
-            print('Sleep for 10 minutes...')
+            print('Sleep for 10 minutes: %s' % url)
             time.sleep(600)
 
 
@@ -120,8 +120,7 @@ def get_dates(sdate, edate):
             for i in range(delta.days + 1)]
 
 
-def crawl_blog_posts_for_query_per_date(*args):
-    query, date = args[0]
+def crawl_blog_posts_for_query_per_date(query, date):
 
     # make directories
     subdir = '/'.join([DATADIR, query, date.split('-')[0]])
@@ -154,33 +153,57 @@ def crawl_blog_posts_for_query_per_date(*args):
                 print Exception(\
                     'Crawl failed for http://blog.naver.com/%s/%s' % (blog_id, log_no))
 
-            time.sleep(sleep)
+            time.sleep(SLEEP)
 
+    overwrite_queries(query, date)
     print query, date, nitems
 
 
+def read_lines(filename):
+    with open(filename, 'r') as f:
+        return filter(None, f.read().decode(ENCODING).split('\n'))
+
+
+def write_lines(lines, filename):
+    with open(filename, 'w') as f:
+        f.write(('\n'.join(lines)).encode(ENCODING))
+
+
+def overwrite_queries(query, date):
+    lines = read_lines(QUERIES)
+    queries = [line.split()[2] for line in lines]
+    index = queries.index(query)
+    lines[index] = '%s %s' % (date, lines[index].split(' ', 1)[-1])
+    write_lines(lines, QUERIES)
+
+
+def open_ssh():
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+    except:
+        pass
+    ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
+    sftp = ssh.open_sftp()
+    return ssh, sftp
+
+
+def close_ssh(ssh, sftp):
+    sftp.close()
+    ssh.close()
+
+
 if __name__=='__main__':
-    sdate, edate = '2010-01-01', '2015-08-01'   # change me
-    sleep = 0.2
 
-    if REMOTE:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        try:
-            ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        except:
-            pass
-        ssh.connect(REMOTE['ip'], username=REMOTE['id'], password=REMOTE['pw'])
-        sftp = ssh.open_sftp()
+    if REMOTE: ssh, sftp = open_ssh()
 
-    with open('queries.txt', 'r') as f:
-        queries = [line.split()[0] for line in f.read().decode(ENCODING).split('\n')[:-1]]
-        dates = get_dates(sdate, edate)
-        qdset = [[q, d] for q in queries for d in dates]
+    qdset = []
+    for line in [line.split()[:3] for line in read_lines(QUERIES)]:
+        sdate, edate, query = line
+        qdset.extend([query, d] for d in get_dates(sdate, edate))
 
-    for qd in qdset:
-        crawl_blog_posts_for_query_per_date(qd)
+    for q, d in qdset:
+        crawl_blog_posts_for_query_per_date(q, d)
 
-    if REMOTE:
-        sftp.close()
-        ssh.close()
+    if REMOTE: close_ssh(ssh, sftp)
