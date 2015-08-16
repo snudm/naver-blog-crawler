@@ -32,6 +32,7 @@
 
 ### Setup
 
+    sudo apt-get install gcc python-dev
     pip install -r requirements.txt
     vi settings.py  # modify REMOTE
     vi queries.txt  # leave queries of interest
