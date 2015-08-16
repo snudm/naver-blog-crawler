@@ -4,7 +4,7 @@
 
 DATADIR     = './tmp'
 ENCODING    = 'utf-8'
-SLEEP       = 0.2
+SLEEP       = 0.05
 QUERIES     = 'queries.txt'
 
 
