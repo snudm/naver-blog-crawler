@@ -1,4 +1,6 @@
-# Naver Blog Lists Crawler
+# Naver blog crawler
+
+## Batch crawler
 
 크롤링 전략은 다음과 같다.
 
@@ -10,88 +12,35 @@
     
     * 각 directory별로 12시간 내의 블로그를 가지고 있음 
 
-## Requirements
+### Requirements
 
 - Python 2.7+
 - `pip install beautifulsoup4`
 
-## Run
+### Run
 
 - **input 변수**: category, crawler version, type
 - **output**: json으로 저장된 파일(크롤러가 돌아갈때마다 하나의 파일을 생성하여 저장함)
 	- 저장된 objects: blogId, blogName, content, crawledTime, crawlerVersion, images, logNo, tags, title, url, wirttenTime
     $ python crawler.py --help
 
-## 파일 저장 형태
+### 파일 저장 형태
 
 - crawler version 0.1: `data/directoryseq/year/month/day/*.json`
 
-## Author
+## Query crawler
+
+### Setup
+
+    pip install -r requirements.txt
+    vi settings.py  # modify REMOTE
+    vi queries.txt  # leave queries of interest
+
+### Run
+
+    python blog_query_crawler.py
+
+## Authors
 
 - [Misuk Kim](http://github.com/misuke88)
-
-# Naver Blog Texts Crawler
-
-크롤링 전략은 다음과 같다.
-
-1. 블로그 본문 크롤링: 'http://m.blog.naver.com/%s/%s' % (blog_id, log_no)
-    - `blogId`: 게시된 블로그의 아이디
-    - `logNo`: 게시된 블로그의 고유 숫자
-    
-    * 종종 비공개 혹은 삭제된 post가 존재함  
-
-## Requirements
-
-- Python 2.7+
-- `pip install beautifulsoup4`
-
-## Run
-
-- **input 변수**: category, path, date
-	- category: 5 ~ 36까지 총 32개의 category
-	- path: base directory로 지정할 경로설정
-	- date: 기존에 긁어온 lists에서 본문(texts)을 가져올 날짜 지정
-- **output**: json으로 저장된 파일(크롤러가 돌아갈때마다 하나의 파일을 생성하여 저장함)
-	- 저장된 objects: blogId, logNo, contentHtml, content, crawledTime, crawlerVersion, categoryName, sympathyCount, images, tags, title, url, wirttenTime
-    $ python blog_page_crawler.py --help
-
-## 파일 저장 형태
-
-- crawler version 0.1: `texts/directoryseq/year/month/day/blogId-logNo.json`
-
-## Author
-
-- [Misuk Kim](http://github.com/misuke88)
-
-# Naver Blog Comments Crawler
-
-크롤링 전략은 다음과 같다.
-
-1. 블로그 덧글 크롤링: 'http://m.blog.naver.com/CommentList.nhn?blogId=%s&logNo=%s' % (blog_id, log_no)
-    - `blogId`: 게시된 블로그의 아이디
-    - `logNo`: 게시된 블로그의 고유 숫자
-    
-    * 종종 비공개 혹은 삭제된 post가 존재함  
-
-## Requirements
-
-- Python 2.7+
-- `pip install beautifulsoup4`
-
-## Run
-
-- **input 변수**: category, path, date
-	- category: 5 ~ 36까지 총 32개의 category
-	- path: base directory로 지정할 경로설정
-	- date: 기존에 긁어온 lists에서 본문(texts)을 가져올 날짜 지정
-- **output**: json으로 저장된 파일(크롤러가 돌아갈때마다 하나의 파일을 생성하여 저장함)
-	- 저장된 objects: blogId, logNo, comments, commentCrawledTime, wirttenTime
-    $ python blog_comment_crawler.py --help
-
-## 파일 저장 형태
-
-- crawler version 0.1: `comments/directoryseq/year/month/day/blogId-logNo.json`
-
-## Author
-
-- [Misuk Kim](http://github.com/misuke88)
+- [Lucy Park](http://github.com/e9t)
