@@ -187,14 +187,21 @@ def close_ssh(ssh, sftp):
 
 if __name__=='__main__':
 
-    if REMOTE: ssh, sftp = open_ssh()
+    trial = 1
+    while 1:
+        print 'Trial:', trial
+        try:
+            if REMOTE: ssh, sftp = open_ssh()
 
-    qdset = []
-    for line in [line.split()[:3] for line in read_lines(QUERIES)]:
-        sdate, edate, query = line
-        qdset.extend([query, d] for d in get_dates(sdate, edate))
+            qdset = []
+            for line in [line.split()[:3] for line in read_lines(QUERIES)]:
+                sdate, edate, query = line
+                qdset.extend([query, d] for d in get_dates(sdate, edate))
 
-    for q, d in qdset:
-        crawl_blog_posts_for_query_per_date(q, d)
+            for q, d in qdset:
+                crawl_blog_posts_for_query_per_date(q, d)
 
-    if REMOTE: close_ssh(ssh, sftp)
+            if REMOTE: close_ssh(ssh, sftp)
+        except Exception as e:
+            print e
+            trial += 1
